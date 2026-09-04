@@ -195,7 +195,7 @@ export default function AhmaPage() {
                 </div>
               </div>
             ) : (
-              <div className="hint">{wallet?.error ?? "讀取中…"}</div>
+              <div className="hint">{wallet?.error ? "鏈上連線暫時不通，幾秒後會自動再試。" : "讀取中…"}</div>
             )}
           </section>
 

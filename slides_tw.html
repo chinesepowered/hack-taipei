@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>阿嬤的錢包</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --panel: #1a1815;
+    --line: #2c2924;
+    --text: #f3ede2;
+    --muted: #a39b8c;
+    --amber: #f2b544;
+    --red: #e5484d;
+    --green: #3ecf8e;
+    --blue: #6ea8fe;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Noto Sans TC", "Inter", system-ui, -apple-system, sans-serif; overflow: hidden; }
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  section { position: absolute; inset: 0; padding: 6vh 7vw; display: none; flex-direction: column;
+    justify-content: center; gap: 2.2vh; }
+  section.active { display: flex; animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .kicker { font-size: 1.05rem; letter-spacing: .12em; color: var(--amber); font-weight: 600; }
+  h1 { font-size: clamp(3rem, 8vw, 7rem); line-height: 1.05; margin: 0; font-weight: 900; letter-spacing: .02em; }
+  h1 .en { display: block; font-family: "Inter", sans-serif; font-weight: 800; color: var(--amber); font-size: .45em; margin-top: .2em; letter-spacing: -.01em; }
+  h2 { font-size: clamp(2rem, 4.5vw, 3.6rem); line-height: 1.15; margin: 0; font-weight: 900; }
+  .sub { font-size: clamp(1.2rem, 2.2vw, 1.8rem); color: var(--muted); max-width: 40ch; line-height: 1.5; }
+  .stat { display: flex; gap: 4vw; margin-top: 2vh; }
+  .stat div { border-left: 3px solid var(--amber); padding-left: 1.2rem; }
+  .stat b { display: block; font-size: clamp(2rem, 4vw, 3.4rem); font-weight: 900; }
+  .stat span { color: var(--muted); font-size: 1rem; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; align-items: stretch; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 2.2rem; display: flex; flex-direction: column; gap: 1rem; }
+  .card h3 { margin: 0; font-size: 1.15rem; letter-spacing: .1em; color: var(--muted); }
+  .card.bad h3 { color: var(--red); } .card.good h3 { color: var(--green); }
+  .quote { font-size: clamp(1.3rem, 2.4vw, 2rem); line-height: 1.5; font-weight: 500; }
+  ol.steps { margin: 0; padding-left: 1.6rem; font-size: clamp(1.05rem, 1.7vw, 1.4rem); line-height: 1.6; display: grid; gap: .7rem; }
+  ol.steps li::marker { color: var(--amber); font-weight: 700; }
+  .meter { margin-top: auto; }
+  .meter .lbl { display: flex; justify-content: space-between; font-size: .95rem; color: var(--muted); margin-bottom: .4rem; }
+  .meter .bar { height: 14px; border-radius: 99px; background: #2a2622; overflow: hidden; }
+  .meter .fill { height: 100%; width: 92%; background: linear-gradient(90deg, var(--amber), var(--red)); border-radius: 99px; }
+  .punch { font-size: clamp(1.4rem, 2.6vw, 2.2rem); font-weight: 700; margin-top: 1vh; }
+  .punch em { color: var(--amber); font-style: normal; }
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 1vw; align-items: center; margin-top: 1vh; }
+  .node { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.3rem 1.2rem; min-height: 24vh; display: flex; flex-direction: column; gap: .5rem; }
+  .node b { font-size: 1.15rem; }
+  .node span { color: var(--muted); font-size: .95rem; line-height: 1.5; }
+  .node.hi { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; }
+  .arrow { color: var(--amber); font-size: 2rem; text-align: center; }
+  .side { display: grid; grid-template-columns: 1fr 1fr; gap: 1vw; margin-top: 1vh; }
+  .chips { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1vh; }
+  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 99px; padding: .45rem 1rem; font-size: .95rem; color: var(--text); }
+  .chip.k { border-color: var(--blue); color: var(--blue); }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; }
+  .three .card p { margin: 0; font-size: 1.15rem; line-height: 1.6; }
+  .three .card b { font-size: 1.35rem; }
+  .foot { display: flex; justify-content: space-between; align-items: end; color: var(--muted); font-size: 1rem; margin-top: 1vh; }
+  .foot code { color: var(--amber); font-size: 1.05rem; font-family: "Inter", monospace; }
+  .nav { position: fixed; bottom: 2vh; right: 3vw; color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+  .dots { position: fixed; bottom: 2.4vh; left: 3vw; display: flex; gap: .5rem; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: block; }
+  .dots i.on { background: var(--amber); }
+  @media (max-width: 900px) {
+    .cols, .three, .side { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr; } .arrow { transform: rotate(90deg); }
+    .node { min-height: 0; }
+    section { justify-content: flex-start; overflow-y: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="active">
+  <div class="kicker">BUILDMODE 2026 · Track 02 日常生活 AI · 國泰金控 AI Agent × 區塊鏈挑戰</div>
+  <h1>阿嬤的錢包<span class="en">Grandma's Wallet</span></h1>
+  <p class="sub">會對詐騙集團說「<b>不</b>」的 AI 代理人，加上一個怎麼騙都騙不走錢的錢包。</p>
+  <div class="stat">
+    <div><b>500 億+</b><span>2024 年全台詐騙財損（新台幣，165 打詐儀錶板）</span></div>
+    <div><b>錢匯出之後</b><span>才是大多數家人知道的時候</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>每個家庭都害怕的那通電話</h2>
+  <div class="cols">
+    <div class="card bad">
+      <h3>現在</h3>
+      <div class="quote">「阿嬤，我是你孫子，我出事了，今天一定要匯 30 萬。」</div>
+      <ol class="steps">
+        <li>阿嬤慌了，直接跑去 ATM。</li>
+        <li>銀行 App 用她看不懂的字警告她。</li>
+        <li>家人隔天才知道。</li>
+      </ol>
+    </div>
+    <div class="card good">
+      <h3>有了阿嬤的錢包</h3>
+      <ol class="steps">
+        <li>阿嬤把代理人開擴音，它陪她一起聽這通電話。</li>
+        <li>詐騙防護盾比對 165 常見手法，先把付款暫停。代理人用她聽得懂的話解釋為什麼可疑，並提議「我幫你打給孫子確認」。</li>
+        <li>家人手機收到一鍵確認。沒有家人共簽，鏈上錢包不會放款。</li>
+      </ol>
+      <div class="meter"><div class="lbl"><span>詐騙風險</span><span>92 · 假冒親友</span></div><div class="bar"><div class="fill"></div></div></div>
+    </div>
+  </div>
+  <div class="punch">拒絕不是寫在提示詞裡，<em>是寫在智慧合約裡。</em></div>
+</section>
+
+<section>
+  <h2>系統如何運作</h2>
+  <div class="flow">
+    <div class="node"><b>阿嬤的手機</b><span>瀏覽器開麥克風、開擴音。不用學 App，用講的就好。</span></div>
+    <div class="arrow">→</div>
+    <div class="node hi"><b>語音代理人</b><span>OpenAI Realtime API，語音進、語音出，可打斷，透過 tool call 執行付款／查詢／解釋。<br>備援：Gemini Live。</span></div>
+    <div class="arrow">→</div>
+    <div class="node hi"><b>詐騙防護盾</b><span>規則引擎 + LLM 結構化輸出，產出風險分數、命中的詐騙手法、白話中文解釋。</span></div>
+    <div class="arrow">→</div>
+    <div class="node hi"><b>GuardedWallet.sol</b><span>Base Sepolia · USDC · 每日額度 · 收款白名單 · 高風險交易需 2-of-N 家人共簽。</span></div>
+  </div>
+  <div class="side">
+    <div class="node"><b>家人共簽 App</b><span>一鍵核准或擋下，簽章直接上鏈。銀行也可以是共簽人之一。</span></div>
+    <div class="node"><b>評審現場看得到</b><span>BaseScan 上看到被合約擋下的交易，再看一筆白名單付款順利完成。</span></div>
+  </div>
+  <div class="chips">
+    <span class="chip k">Next.js + pnpm</span><span class="chip k">OpenAI Realtime</span><span class="chip k">Gemini Live（備援）</span>
+    <span class="chip k">Foundry + Solidity</span><span class="chip k">viem / wagmi</span><span class="chip k">Base Sepolia</span><span class="chip">MIT 開源</span>
+  </div>
+</section>
+
+<section>
+  <h2>為什麼重要</h2>
+  <div class="three">
+    <div class="card"><b>對阿嬤</b><p>一個像家人的聲音，在她最被催促的那一刻，幫她慢下來。</p></div>
+    <div class="card"><b>對家人</b><p>錢還沒匯出前的一鍵確認，而不是匯出後的報案三聯單。</p></div>
+    <div class="card"><b>對銀行</b><p>一個「守護錢包」產品：可程式化的額度與共簽人，社交工程再厲害也繞不過去。</p></div>
+  </div>
+  <div class="chips">
+    <span class="chip">Track 02 · 日常生活 AI</span><span class="chip">國泰金控 · AI Agent × 區塊鏈</span><span class="chip">開源 · MIT</span>
+  </div>
+  <div class="foot">
+    <div><b>下一步：</b>高風險通話轉接 165 專線 · 原生台語語音 · 銀行託管整合</div>
+    <div><code>github.com/TODO/grandmas-wallet</code></div>
+  </div>
+</section>
+
+</div>
+<div class="dots" id="dots"></div>
+<div class="nav" id="nav"></div>
+<script>
+  const slides = [...document.querySelectorAll('section')];
+  let i = 0;
+  const dots = document.getElementById('dots');
+  slides.forEach((_, k) => { const d = document.createElement('i'); d.onclick = () => go(k); dots.appendChild(d); });
+  function go(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+    document.getElementById('nav').textContent = (i + 1) + ' / ' + slides.length;
+    location.hash = i + 1;
+  }
+  addEventListener('keydown', e => {
+    if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); go(i + 1); }
+    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(i - 1); }
+  });
+  document.querySelector('.deck').addEventListener('click', e => { if (!e.target.closest('.dots')) go(i + 1); });
+  go((parseInt(location.hash.slice(1)) || 1) - 1);
+</script>
+</body>
+</html>

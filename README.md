@@ -12,7 +12,7 @@
 | 贊助商挑戰 | **國泰金控 · AI Agent × 區塊鏈金融** |
 | 程式碼 | https://github.com/chinesepowered/hack-taipei |
 | 鏈上合約（Base Sepolia） | [0x6375…7a57](https://sepolia.basescan.org/address/0x6375461086204bd26700fa2ab2bec77f005d7a57) |
-| 評選影片 | https://www.youtube.com/watch?v=9oUsJcKFBxA |
+| 評選影片 | https://www.youtube.com/watch?v=EE9ZAPGaEmU |
 | 簡報 | [中文](./slides_tw.html) · [English](./slides_en.html) · Demo 台詞 [DEMO.md](./DEMO.md) |
 
 ---

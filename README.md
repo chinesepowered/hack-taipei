@@ -12,7 +12,7 @@
 | 贊助商挑戰 | **國泰金控 · AI Agent × 區塊鏈金融** |
 | 程式碼 | https://github.com/chinesepowered/hack-taipei |
 | 鏈上合約（Base Sepolia） | [0x6375…7a57](https://sepolia.basescan.org/address/0x6375461086204bd26700fa2ab2bec77f005d7a57) |
-| 評選影片 | 依繳交表單所附 YouTube 連結 |
+| 評選影片 | https://www.youtube.com/watch?v=9oUsJcKFBxA |
 | 簡報 | [中文](./slides_tw.html) · [English](./slides_en.html) · Demo 台詞 [DEMO.md](./DEMO.md) |
 
 ---
@@ -133,6 +133,6 @@ pnpm test && pnpm typecheck && pnpm smoke
 
 ## 附：Track 04 科幻音樂 MV
 
-同隊另外參加 CSFCCA LIVE AI「02 科幻音樂 MV」《從第一個 Prompt 到最後一個鏡頭》，與主作品各自獨立評選。9 鏡 × 15 秒對應官方歌曲，使用官方角色 LUNA、志奇與 X 系列機器人，以 Wan 3.0 image-to-video 生成。分鏡、Prompt 與生成紀錄在 `film/`，官方素材與成片不入庫。
+同隊另外參加 CSFCCA LIVE AI「02 科幻音樂 MV」《從第一個 Prompt 到最後一個鏡頭》，與主作品各自獨立評選。9 鏡 × 15 秒對應官方歌曲，使用官方角色 LUNA、志奇與 X 系列機器人，以 Wan 3.0 image-to-video 生成。成片：https://www.youtube.com/watch?v=PeaZ5_VBIjs 。分鏡、Prompt 與生成紀錄在 `film/`，官方素材與成片檔案不入庫。
 
 MIT License © 2026 阿嬤的錢包團隊

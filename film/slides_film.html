@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>從第一個 Prompt 到最後一個鏡頭</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0b0a12; --panel:#15131f; --line:#2a2638; --text:#f2eefb; --muted:#a49cbb; --violet:#b48cff; --cyan:#5fe3ff; --pink:#ff7ad9; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:"Noto Sans TC","Inter",system-ui,sans-serif; overflow:hidden; }
+  .deck { position:relative; width:100vw; height:100vh; }
+  section { position:absolute; inset:0; padding:6vh 7vw; display:none; flex-direction:column; justify-content:center; gap:2vh; }
+  section.active { display:flex; animation:fade .35s ease; }
+  @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+  .kicker { color:var(--cyan); font-weight:700; letter-spacing:.14em; font-size:1rem; }
+  h1 { font-size:clamp(2.6rem,6.5vw,5.6rem); line-height:1.08; margin:0; font-weight:900; }
+  h1 .en { display:block; font-family:"Inter",sans-serif; font-weight:800; color:var(--violet); font-size:.42em; margin-top:.25em; }
+  h2 { font-size:clamp(1.9rem,4vw,3.2rem); margin:0; font-weight:900; line-height:1.15; }
+  .sub { color:var(--muted); font-size:clamp(1.1rem,2vw,1.6rem); line-height:1.5; max-width:46ch; }
+  .facts { display:flex; gap:3vw; flex-wrap:wrap; margin-top:1vh; }
+  .facts div { border-left:3px solid var(--violet); padding-left:1rem; }
+  .facts b { display:block; font-size:clamp(1.6rem,3.2vw,2.6rem); font-weight:900; }
+  .facts span { color:var(--muted); font-size:.95rem; }
+  .shots { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2vw; }
+  .shot { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .shot img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#000; }
+  .shot div { padding:.5rem .8rem .7rem; font-size:.9rem; line-height:1.4; }
+  .shot b { color:var(--cyan); }
+  .shot i { color:var(--muted); font-style:normal; display:block; font-size:.82rem; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:2.5vw; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1.6rem 1.8rem; }
+  .card h3 { margin:0 0 .6rem; font-size:1rem; letter-spacing:.1em; color:var(--muted); }
+  .card ul { margin:0; padding-left:1.2rem; font-size:1.1rem; line-height:1.6; }
+  .card li::marker { color:var(--violet); }
+  .big { font-size:clamp(1.5rem,3vw,2.5rem); font-weight:900; }
+  .big em { color:var(--pink); font-style:normal; }
+  table { border-collapse:collapse; width:100%; font-size:1.05rem; }
+  td, th { border-bottom:1px solid var(--line); padding:.55rem .6rem; text-align:left; }
+  th { color:var(--muted); font-weight:600; font-size:.9rem; letter-spacing:.06em; }
+  .nav { position:fixed; bottom:2vh; right:3vw; color:var(--muted); font-size:.9rem; }
+  .dots { position:fixed; bottom:2.4vh; left:3vw; display:flex; gap:.5rem; }
+  .dots i { width:9px; height:9px; border-radius:50%; background:var(--line); display:block; }
+  .dots i.on { background:var(--violet); }
+  @media (max-width:900px){ .shots{grid-template-columns:1fr 1fr} .cols{grid-template-columns:1fr} section{justify-content:flex-start;overflow-y:auto} }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="active">
+  <div class="kicker">CSFCCA LIVE AI · 02 科幻音樂 MV · BUILDMODE 2026 TRACK 04</div>
+  <h1>從第一個 Prompt<br>到最後一個鏡頭<span class="en">From the First Prompt to the Last Shot</span></h1>
+  <p class="sub">主辦方給的三組角色，本身就是三種媒介：志奇是電影、LUNA 是動畫、X 系列機器人是科幻美術。所以這支 MV 的主題，就是「創作本身」。</p>
+  <div class="facts">
+    <div><b>2:14</b><span>官方歌曲全長 · 1080p</span></div>
+    <div><b>9 鏡</b><span>每鏡 15 秒 · 對應歌詞段落</span></div>
+    <div><b>5 角色</b><span>LUNA · 志奇 · X-01 · X-02 · X-03</span></div>
+    <div><b>1 天</b><span>9/4 現場完成</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>世界觀：角色從設定稿上醒來</h2>
+  <div class="shots">
+    <div class="shot"><img src="out/thumb_01.jpg" alt=""><div><b>01</b> 訊號亮起 · LUNA 的線稿上色、走出紙面<i>image-to-video，第一幀 = 官方設定稿</i></div></div>
+    <div class="shot"><img src="out/thumb_02.jpg" alt=""><div><b>02</b> 第一束光 · 志奇下第一個 Prompt，指尖浮現城市<i>第一幀 = 官方寫實照片</i></div></div>
+    <div class="shot"><img src="out/thumb_03.jpg" alt=""><div><b>03</b> 沒有攝影棚 · X-01 醒來，窗外是漂浮城市<i>第一幀 = 三視圖正面</i></div></div>
+    <div class="shot"><img src="out/thumb_04.jpg" alt=""><div><b>04</b> 每一次生成都是新宇宙 · X-02 投影建城<i>倒數光環呼應「時間正在倒數」</i></div></div>
+    <div class="shot"><img src="out/thumb_05.jpg" alt=""><div><b>05</b> 副歌 · LUNA 在台北上空的懸浮舞台<i>純文字生成，造型鎖定</i></div></div>
+    <div class="shot"><img src="out/thumb_06.jpg" alt=""><div><b>06</b> 讓世界重新打開 · X-03 衝過光之峽谷進太空<i>第一幀 = 三視圖正面</i></div></div>
+    <div class="shot"><img src="out/thumb_07.jpg" alt=""><div><b>07</b> Show me your world · 志奇走進作品的畫廊<i>三種畫風同框</i></div></div>
+    <div class="shot"><img src="out/thumb_08.jpg" alt=""><div><b>08</b> 321 LIVE AI · 全員大合舞、光之煙火<i>純文字生成</i></div></div>
+    <div class="shot"><img src="out/thumb_09.jpg" alt=""><div><b>09</b> 讓想像成真 · 一切縮回一點光，回到空白畫面<i>片頭片尾成迴圈</i></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>AI 技術與製作流程</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>生成</h3>
+      <ul>
+        <li>GMI Cloud · Wan 3.0 Video Prime，1080P，15 秒／鏡</li>
+        <li>7 鏡 image-to-video：官方設定稿裁切、補成 16:9 當第一幀，角色造型不跑</li>
+        <li>2 鏡純文字：高密度造型描述 + negative prompt 鎖服裝</li>
+        <li>固定 seed，每一鏡可重現</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>管線（開源）</h3>
+      <ul>
+        <li>分鏡 JSON → 一次批次送出 → 輪詢 → 下載 → ffmpeg 串接、套歌、淡出</li>
+        <li>request id 即時落盤：當機不重複計費，可續跑</li>
+        <li>版本紀錄：01 因裁切重做、02 過審改寫、07 卡住重送，全部留檔</li>
+        <li>創作理念 PDF 由同一份資料自動產生</li>
+      </ul>
+    </div>
+  </div>
+  <div class="big">全片 12 次生成，算力成本 <em>約 US$2.4</em>，從分鏡到成片 <em>約 1 小時</em>。</div>
+</section>
+
+<section>
+  <h2>市場潛力：分鏡進、MV 出</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>誰需要</h3>
+      <ul>
+        <li>獨立音樂人、小廠牌：一支傳統 MV 動輒新台幣數十萬，多數歌沒有 MV</li>
+        <li>虛擬偶像、IP 方：已有角色設定稿，缺的是「讓角色動起來」的量產方式</li>
+        <li>影視前製：用真實角色圖做動態分鏡（animatic），一小時看到全片節奏</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>商業模式</h3>
+      <table>
+        <tr><th>方案</th><th>內容</th></tr>
+        <tr><td>單支 MV</td><td>分鏡 + 生成 + 剪輯，按鏡頭數計價，成本結構透明</td></tr>
+        <tr><td>IP 授權工作流</td><td>以授權設定稿為第一幀，每次生成留 request 紀錄，可稽核、可回溯</td></tr>
+        <tr><td>平台訂閱</td><td>對接聚合平台：模型 A 的圖直接進模型 B，不落地、不重傳</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="big">歌曲唱的是「讓電影 讓音樂 讓動畫重新醒來」。<em>我們把它做成了一條可以重複的流程。</em></div>
+</section>
+
+</div>
+<div class="dots" id="dots"></div>
+<div class="nav" id="nav"></div>
+<script>
+  const slides=[...document.querySelectorAll('section')];let i=0;const dots=document.getElementById('dots');
+  slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+  function go(n){i=(n+slides.length)%slides.length;slides.forEach((s,k)=>s.classList.toggle('active',k===i));[...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));document.getElementById('nav').textContent=(i+1)+' / '+slides.length;location.hash=i+1;}
+  addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();go(i+1);}if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(i-1);}});
+  document.querySelector('.deck').addEventListener('click',e=>{if(!e.target.closest('.dots'))go(i+1);});
+  go((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

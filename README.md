@@ -3,7 +3,7 @@
 > 在詐騙集團拿到錢之前，先接起電話的 AI 代理人。拒絕不是寫在提示詞裡，是寫在智慧合約裡。
 
 **BUILDMODE GEN-AI HACKATHON 2026 · FUTUREMODE × SITCON**
-主賽道：Track 02 AI for Everyday Life 日常生活 AI
+主賽道：Track 05 AI for Taiwan / Social Impact 台灣與社會影響
 贊助商挑戰：國泰金控 Cathay Financial — AI Agent × 區塊鏈金融
 
 | 項目 | 連結 |

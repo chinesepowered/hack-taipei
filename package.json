@@ -14,7 +14,8 @@
     "fund": "node --env-file=.env --import=tsx scripts/fund.ts",
     "deploy": "node --env-file=.env --import=tsx scripts/deploy.ts",
     "smoke": "node --env-file=.env --import=tsx scripts/smoke.ts",
-    "film": "node --env-file=.env --import=tsx scripts/film.ts"
+    "film": "node --env-file=.env --import=tsx scripts/film.ts",
+    "concept": "node --import=tsx scripts/concept.ts"
   },
   "dependencies": {
     "next": "^16.3.4",

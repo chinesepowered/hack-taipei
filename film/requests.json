@@ -1,8 +1,89 @@
 {
-  "01": {
+  "01_v1": {
     "request_id": "46edf859-d71d-4549-a1d9-c93a23657ead",
     "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:49:24.159Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/46edf859-d71d-4549-a1d9-c93a23657ead.mp4",
+    "file": "film/clips/01_v1.mp4",
+    "note": "v1: unpadded 3:8 reference was center-cropped, opening frame showed only the skirt; costume drifted to a jacket"
+  },
+  "01": {
+    "request_id": "cc041f55-e919-4f2b-a9ce-15c8c720e7c4",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:03.022Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/cc041f55-e919-4f2b-a9ce-15c8c720e7c4.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\01.mp4"
+  },
+  "03": {
+    "request_id": "b512bd4e-068b-4e48-842a-c41a195d68b6",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:09.263Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/b512bd4e-068b-4e48-842a-c41a195d68b6.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\03.mp4"
+  },
+  "04": {
+    "request_id": "a1b63dcc-80a1-4b39-8ffb-b031ae6f8bf4",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:22.407Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/a1b63dcc-80a1-4b39-8ffb-b031ae6f8bf4.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\04.mp4"
+  },
+  "05": {
+    "request_id": "f75a701b-4ae8-4349-9c91-4d71bd22dd31",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:23.565Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/f75a701b-4ae8-4349-9c91-4d71bd22dd31.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\05.mp4"
+  },
+  "06": {
+    "request_id": "58f6805e-abdd-49a9-b18b-96e87bf02aa9",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:30.903Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/58f6805e-abdd-49a9-b18b-96e87bf02aa9.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\06.mp4"
+  },
+  "07": {
+    "request_id": "fb304a61-85a6-44e8-bd0e-87c76a6d7644",
+    "model": "wan3.0-video-prime",
     "status": "processing",
-    "submitted_at": "2026-09-04T06:49:24.159Z"
+    "submitted_at": "2026-09-04T06:56:33.872Z"
+  },
+  "08": {
+    "request_id": "10c4dd2d-ad42-4f13-857a-abed12832a43",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:35.103Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/10c4dd2d-ad42-4f13-857a-abed12832a43.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\08.mp4"
+  },
+  "09": {
+    "request_id": "03ddd7d1-8eb5-4ed4-8230-205aebce0465",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:56:38.279Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/03ddd7d1-8eb5-4ed4-8230-205aebce0465.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\09.mp4"
+  },
+  "02_fail1": {
+    "request_id": "b3a23f9b-0b08-46f0-b6f6-2b402a748997",
+    "model": "wan3.0-video-prime",
+    "status": "failed",
+    "submitted_at": "2026-09-04T06:56:06.344Z",
+    "error": "{\"request_id\":\"b3a23f9b-0b08-46f0-b6f6-2b402a748997\",\"org_id\":\"f9b6c87e-38cf-464b-9941-c9cc75819566\",\"user_id\":\"11254790-dd0b-4111-a108-faa6d0c9771c\",\"model\":\"wan3.0-video-prime\",\"status\":\"failed\",\"is_public\":false,\"payload\":{\"duration\":15,\"first_frame\":\"data:image/jpeg;base64,/9j/4gxYSUNDX1BST0ZJTEUAAQEAAAxITGlubwIQAABtbnRyUkdCIFhZWiAHzgACAAkABgAxAABhY3NwTVNGVAAAAABJRUMgc1JHQgAAAAAAAAAAAAAAAQAA9t",
+    "note": "text moderation (DataInspectionFailed) on original prompt"
+  },
+  "02": {
+    "request_id": "c462e7c3-5aa9-409a-a798-a01459774700",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T06:58:07.586Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/c462e7c3-5aa9-409a-a798-a01459774700.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\02.mp4"
   }
 }

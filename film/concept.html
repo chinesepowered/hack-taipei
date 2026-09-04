@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<title>創作理念 — 從第一個 Prompt 到最後一個鏡頭</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif; color: #1a1a1a; font-size: 11.5pt; line-height: 1.65; margin: 0; }
+  h1 { font-size: 24pt; margin: 0 0 4pt; letter-spacing: .02em; }
+  h2 { font-size: 15pt; margin: 22pt 0 8pt; border-left: 5px solid #6a4c93; padding-left: 8pt; }
+  h3 { font-size: 12pt; margin: 14pt 0 4pt; }
+  .kicker { color: #6a4c93; font-weight: 700; letter-spacing: .12em; font-size: 9.5pt; }
+  .meta { color: #555; font-size: 10pt; margin-bottom: 14pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; margin: 6pt 0 10pt; }
+  th, td { border: 1px solid #ccc; padding: 5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #f1ecf7; }
+  .shot { break-inside: avoid; border: 1px solid #ddd; border-radius: 6pt; padding: 8pt 10pt; margin: 8pt 0; }
+  .shot b { color: #6a4c93; }
+  .lyric { color: #444; font-style: italic; }
+  .prompt { font-family: Consolas, "Courier New", monospace; font-size: 9pt; color: #333; background: #fafafa; padding: 6pt; border-radius: 4pt; white-space: pre-wrap; margin-top: 4pt; }
+  .small { font-size: 9.5pt; color: #555; }
+  ul { margin: 4pt 0 8pt; padding-left: 18pt; }
+</style>
+</head>
+<body>
+
+<div class="kicker">CSFCCA LIVE AI · AI × CREATIVE TECHNOLOGY · 02 科幻音樂 MV</div>
+<h1>從第一個 Prompt 到最後一個鏡頭</h1>
+<div class="meta">創作理念說明 · 隊伍：_TODO 隊名_ · BUILDMODE GEN-AI HACKATHON 2026 · 2026/09/04 現場創作</div>
+
+<h2>一、創作發想</h2>
+<p>主辦方提供的三組角色，本身就是三種媒介：寫實照片的志奇是「電影」，動畫設定稿的 LUNA 是「動畫」，三視圖的 X-01／X-02／X-03 機器人是「科幻片的美術設定」。歌詞唱的正是「讓電影 讓音樂 讓動畫重新醒來」。</p>
+<p>所以我們不把角色硬湊進同一個畫風，而是讓 MV 的主題就是「創作本身」：志奇是創作者，坐在黑暗的工作室裡下第一個 Prompt；LUNA 和機器人們從各自的設定稿上「醒來」，走出紙面，長出自己的世界；最後所有世界縮回一點光，回到一張空白的畫面，等待下一個靈感。片名取自歌詞「從第一個 Prompt 到最後一個鏡頭」。</p>
+<p>科幻元素：漂浮城市、全像投影建城、光之峽谷、太空極光、無人機燈陣、懸浮舞台。每一個世界都是「被生成出來」的世界，這也是本次黑客松「GEN-AI」的題旨。</p>
+
+<h2>二、設計概念與角色運用</h2>
+<table>
+  <tr><th style="width:18%">官方角色</th><th style="width:22%">在片中的角色</th><th>延伸與處理方式</th></tr>
+  <tr><td>志奇（寫實）</td><td>創作者</td><td>保留原始照片中的白襯衫／毛背心造型與神情，以官方照片作為 image-to-video 的第一幀，讓人物直接「從照片中動起來」。場景延伸為未來工作室與光之畫廊。</td></tr>
+  <tr><td>LUNA（動畫）</td><td>舞台上的表演者</td><td>第一個鏡頭直接使用官方設定稿全身圖作為第一幀，讓線稿上色、走出紙面，呼應「一張空白的畫面等著第一束光出現」。副歌以文字描述（紫色編髮馬尾、白色拉鍊背心、白裙鏈條、厚底鞋）維持造型一致。</td></tr>
+  <tr><td>X-01 探索型</td><td>發現世界的人</td><td>橙色視窗亮起、走向窗外的漂浮城市。以三視圖正面作第一幀。</td></tr>
+  <tr><td>X-02 支援型</td><td>建造世界的人</td><td>藍色面板投影藍圖，城市一格一格長出來。以三視圖正面作第一幀。</td></tr>
+  <tr><td>X-03 高速型</td><td>穿越世界的人</td><td>綠色單眼、翼鰭，衝過光之峽谷進入太空。以三視圖正面作第一幀。</td></tr>
+</table>
+<p class="small">依競賽規範，僅對造型、服裝、場景、動作、鏡頭與視覺風格做合理延伸，未醜化、未裸露、未用於本賽事以外用途。官方素材未放入公開程式碼儲存庫。</p>
+
+<h2>三、分鏡與 Prompt</h2>
+<p class="small">全片 9 個鏡頭 × 15 秒 = 135 秒，對應歌曲 2 分 14 秒。每個鏡頭列出對應歌詞、第一幀來源與實際送入模型的 Prompt（另加共用風格詞）。共用風格詞：<span class="prompt" style="display:inline">Cinematic sci-fi music video, 1080p, anamorphic lens flares, volumetric light, rich color grading, smooth camera motion, high detail, no text, no captions, no watermark.</span></p>
+
+<!-- SHOTS -->
+
+<h2>四、生成過程與工具</h2>
+<table>
+  <tr><th style="width:24%">階段</th><th>工具／模型</th><th style="width:34%">說明</th></tr>
+  <tr><td>分鏡與 Prompt</td><td>人工撰寫，依歌詞段落分配</td><td>先聽歌、讀歌詞，切成 9 段各 15 秒，再為每段寫鏡頭語言與動作。</td></tr>
+  <tr><td>參考圖前處理</td><td>ffmpeg 裁切、縮放至 1024px</td><td>從官方設定稿裁出單一角色正面圖，去除網站介面與標註文字，避免文字被帶進影片。</td></tr>
+  <tr><td>影片生成</td><td>GMI Cloud · Wan 3.0 Video Prime（image-to-video / text-to-video）</td><td>1080P、16:9、15 秒、prompt_extend 開啟、固定 seed。7 個鏡頭以官方圖作第一幀，2 個副歌鏡頭純文字生成。</td></tr>
+  <tr><td>批次管線</td><td>自寫 TypeScript 腳本（scripts/film.ts，開源）</td><td>一次送出、輪詢、下載，request id 即時落盤避免重複計費；先單獨送第 1 鏡驗證圖片輸入，再送其餘 8 鏡。</td></tr>
+  <tr><td>剪輯與聲音</td><td>ffmpeg（libx264, AAC）</td><td>統一 1920×1080 / 24fps，依鏡頭順序串接，套上官方指定音樂，片尾 3 秒淡出。</td></tr>
+</table>
+
+<h2>五、版本比較與取捨</h2>
+<ul>
+  <li><b>一次成型 vs. 多版挑選：</b>因黑客松時間與額度限制，每個鏡頭只生成一次（固定 seed 以便重現）。若某鏡頭失敗，管線只重送該鏡頭，其他不動。</li>
+  <li><b>畫風統一 vs. 三種媒介：</b>我們選擇保留三種畫風（寫實、動畫、科幻美術），並以「創作者與他的作品」作為敘事框架，讓風格差異成為主題而非缺陷。</li>
+  <li><b>參考圖 vs. 純文字：</b>有官方圖的角色用 image-to-video 保證造型；副歌兩個全員鏡頭因為沒有多人合照素材，改用高密度文字描述。</li>
+</ul>
+
+<h2>六、剪輯、CG／VFX 與聲音</h2>
+<ul>
+  <li>剪輯：依歌詞段落硬切，每 15 秒換一個世界，讓節奏跟著歌走；片頭從白紙進、片尾回到白光，形成迴圈。</li>
+  <li>VFX：全部由生成模型完成（全像投影、體素建城、光之峽谷、極光、無人機燈陣），無後製合成。</li>
+  <li>聲音：僅使用官方指定音樂《CSFCCA LIVE AI》（詞曲 JOHNNY LIN、編曲 ANIMA LEE），無額外配音或音效。</li>
+</ul>
+
+<h2>七、完成流程與紀錄</h2>
+<p>所有 Prompt、seed、模型名稱、request id 與生成時間皆保存在公開儲存庫的 <span class="prompt" style="display:inline">film/storyboard.json</span> 與 <span class="prompt" style="display:inline">film/requests.json</span>，可供查核。儲存庫：<span class="prompt" style="display:inline">https://github.com/chinesepowered/hack-taipei</span>（官方素材與生成影片不入庫）。</p>
+
+</body>
+</html>

@@ -13,70 +13,73 @@
       "lyric": "訊號亮起 畫面開啟 倒數開始 世界重啟 / 321 LIVE AI",
       "duration": 15,
       "seed": 20260901,
-      "first_frame": "film/refs/luna_full.jpg",
-      "prompt": "A character design sketch of LUNA, an anime girl with a long purple braided ponytail, white sleeveless zip-up crop top, white mini skirt with silver chains, black belt, white platform sneakers, drawn on white paper. A single beam of light sweeps across the page. The pencil lines fill with color, the paper texture dissolves, and she blinks and comes alive, turning her head to look at the camera with a confident smile. The white background peels away into a deep starfield with drifting particles of light. Slow push-in, then a gentle orbit around her as she steps forward off the page."
+      "first_frame": "film/refs/luna_full_wide.jpg",
+      "negative_prompt": "jacket, hoodie, coat, sleeves, dark top, blurry, low quality, distorted, extra limbs, deformed face, deformed hands, text, letters, captions, subtitles, watermark, logo, static image, flicker",
+      "prompt": "A full-body character design sketch of LUNA on a white page: an anime girl with a long purple braided ponytail, a white sleeveless high-neck zip-up crop top, a white cargo mini skirt with silver chains and a black belt, white socks and chunky white platform sneakers. A single beam of light sweeps across the page and the camera pushes in toward her. The pencil lines fill with color while she keeps exactly the same outfit, bare shoulders, no jacket. She blinks, comes alive, turns her head and gives the camera a confident smile. The white page peels away into a deep starfield with drifting particles of light. Ends on a medium close-up of her face lit by starlight."
     },
     {
       "id": "02",
       "lyric": "一張空白的畫面等著第一束光出現 / 一個還沒有人看過的世界正在指尖慢慢浮現",
       "duration": 15,
       "seed": 20260902,
-      "first_frame": "film/refs/zhiqi_white.jpg",
-      "prompt": "A realistic young Taiwanese man in a white shirt and jeans, seated in a dark futuristic studio. He looks up, reaches out, and a huge translucent holographic screen ignites in front of him. As his fingers move through the air, glowing blue and gold particles rise from his fingertips and assemble into a floating miniature city with towers and airships, slowly revolving. Light from the hologram plays across his face. Cinematic live-action look, shallow depth of field, slow dolly in."
+      "first_frame": "film/refs/zhiqi_white_wide.jpg",
+      "prompt": "Live-action cinematic. A young East Asian man in a white shirt and jeans sits in a softly lit photo studio. The room dims into a futuristic creative studio. He looks up and a large translucent holographic display switches on in front of him. Glowing blue and gold particles float upward and gather into a miniature floating city with towers and airships, slowly revolving in the air. Soft hologram light plays across his face as he smiles. Shallow depth of field, slow dolly in, warm and cool contrast lighting."
     },
     {
       "id": "03",
       "lyric": "沒有攝影棚 沒有既定劇本 只有時間不停往前 / 把腦海裡不可能的畫面現在全部變成眼前",
       "duration": 15,
       "seed": 20260903,
-      "first_frame": "film/refs/x01_front.jpg",
-      "prompt": "A small white explorer robot with a round head, a glossy orange dome visor and two orange chest lights, standing in a dim spaceship workshop. Its visor flickers and lights up orange, it tilts its head, flexes its fingers, then walks forward with a bouncy curious gait toward a huge window. The shutter rises to reveal a vast floating sci-fi city among clouds at golden hour, airships drifting past. Camera follows behind the robot then swings around to catch the city reflected in its visor. Warm cinematic light."
+      "first_frame": "film/refs/x01_front_wide.jpg",
+      "prompt": "A small white explorer robot with a round head, a glossy orange dome visor and two orange chest lights, drawn on a white page, comes to life: the page fades into a dim spaceship workshop around it. Its visor flickers and lights up orange, it tilts its head, flexes its fingers, then walks forward with a bouncy curious gait toward a huge window. The shutter rises to reveal a vast floating sci-fi city among clouds at golden hour, airships drifting past. Camera follows behind the robot then swings around to catch the city reflected in its visor. Warm cinematic light."
     },
     {
       "id": "04",
       "lyric": "從第一個 Prompt 到最後一個鏡頭 / 每一次生成都是新的宇宙 / 時間正在倒數沒有人可以停留",
       "duration": 15,
       "seed": 20260904,
-      "first_frame": "film/refs/x02_front.jpg",
-      "prompt": "A boxy beige support robot with a rectangular head, two glowing blue eye-bars, a small antenna with an orange tip, a blue chest screen and tool pouches on its hips. It raises both mechanical hands and projects blue holographic blueprints into the air. Around it, a futuristic city assembles itself block by block out of glowing voxels, towers rising, bridges snapping into place, neon lights switching on in sequence. Huge countdown light rings pulse in the sky above. Camera cranes up and back to reveal the growing skyline. Energetic, rhythmic motion."
+      "first_frame": "film/refs/x02_front_wide.jpg",
+      "prompt": "A boxy beige support robot with a rectangular head, two glowing blue eye-bars, a small antenna with an orange tip, a blue chest screen and tool pouches on its hips, drawn on a white page. The page dissolves into a dark empty plain. It raises both mechanical hands and projects blue holographic blueprints into the air. Around it, a futuristic city assembles itself block by block out of glowing voxels, towers rising, bridges snapping into place, neon lights switching on in sequence. Huge countdown light rings pulse in the sky above. Camera cranes up and back to reveal the growing skyline. Energetic, rhythmic motion."
     },
     {
       "id": "05",
       "lyric": "LIVE AI 現在就創造未來 / 讓想像穿越畫面之外",
       "duration": 15,
       "seed": 20260905,
-      "prompt": "Anime style. LUNA, a girl with a long purple braided ponytail with silver chain hair accessories, white sleeveless zip-up crop top, white mini skirt with silver chains and a black belt, white platform sneakers, performs on a floating neon stage high above a futuristic Taipei at night, a tall spire tower glowing behind her. Spotlights sweep, camera drones circle, holographic petals rain down. She dances with confident energetic moves, spins, then points straight at the camera with a bright smile. Fast dynamic camera: orbit, low angle, push-in on her face. Vibrant purple, cyan and white lighting."
+      "negative_prompt": "jacket, hoodie, coat, sleeves, dark top, blurry, low quality, distorted, extra limbs, deformed face, deformed hands, text, letters, captions, subtitles, watermark, logo, static image, flicker",
+      "prompt": "Anime style. LUNA, a girl with a long purple braided ponytail with silver chain hair accessories, wearing a white sleeveless high-neck zip-up crop top with bare shoulders, a white cargo mini skirt with silver chains and a black belt, white socks and chunky white platform sneakers, performs on a floating neon stage high above a futuristic Taipei at night, a tall spire tower glowing behind her. Spotlights sweep, camera drones circle, holographic petals rain down. She dances with confident energetic moves, spins, then points straight at the camera with a bright smile. Fast dynamic camera: orbit, low angle, push-in on her face. Vibrant purple, cyan and white lighting."
     },
     {
       "id": "06",
       "lyric": "LIVE AI 讓世界重新打開 / 讓光影 讓聲音 讓故事全部醒來",
       "duration": 15,
       "seed": 20260906,
-      "first_frame": "film/refs/x03_front.jpg",
-      "prompt": "A sleek white high-speed robot with a streamlined head, a single glowing green eye and swept-back wing fins. Its eye flares green, it crouches and launches forward, racing at incredible speed through a canyon of light with streaks of neon flowing past. It banks and weaves between glowing pillars, breaks through a wall of clouds and bursts into open space where a giant aurora unfolds. Camera chases from behind, then a dramatic side profile at full speed, light trails and motion blur. Exhilarating, fast, cinematic."
+      "first_frame": "film/refs/x03_front_wide.jpg",
+      "prompt": "A sleek white high-speed robot with a streamlined head, a single glowing green eye and swept-back wing fins, drawn on a white page. The page shatters into light. Its eye flares green, it crouches and launches forward, racing at incredible speed through a canyon of light with streaks of neon flowing past. It banks and weaves between glowing pillars, breaks through a wall of clouds and bursts into open space where a giant aurora unfolds. Camera chases from behind, then a dramatic side profile at full speed, light trails and motion blur. Exhilarating, fast, cinematic."
     },
     {
       "id": "07",
       "lyric": "Create it Make it Show me your world / Dream it Build it Let the future unfold",
       "duration": 15,
       "seed": 20260907,
-      "first_frame": "film/refs/zhiqi_sweater.jpg",
-      "prompt": "A realistic young Taiwanese man in a cream cable-knit sweater vest over a purple shirt, smiling, sits in a warm studio. He stands and walks slowly through a gallery of tall glowing glass panels floating in the dark. Inside each panel a different world plays like living film: a floating city, a white robot with an orange visor waving, an anime girl with a purple ponytail dancing, a sleek winged robot racing through light. He touches one panel and light ripples outward across all of them. Steadicam walk-along, shallow depth of field, cinematic warm and cool contrast lighting."
+      "first_frame": "film/refs/zhiqi_sweater_wide.jpg",
+      "prompt": "A realistic young Taiwanese man in a cream cable-knit sweater vest over a purple shirt, smiling, seated in a warm studio. He stands and walks slowly through a gallery of tall glowing glass panels floating in the dark. Inside each panel a different world plays like living film: a floating city, a white robot with an orange visor waving, an anime girl with a purple ponytail dancing, a sleek winged robot racing through light. He touches one panel and light ripples outward across all of them. Steadicam walk-along, shallow depth of field, cinematic warm and cool contrast lighting."
     },
     {
       "id": "08",
       "lyric": "321 LIVE AI 現在就創造未來 / 讓你的世界被所有人看見",
       "duration": 15,
       "seed": 20260908,
-      "prompt": "Grand finale on a colossal floating stage above a futuristic night city. An anime girl with a long purple braided ponytail in a white zip-up crop top and white mini skirt dances at center stage. Beside her, three small white robots dance in sync: one with a round head and orange dome visor, one boxy with a rectangular head and blue eye-bars, one sleek with a green single eye and wing fins. Fireworks made of light particles burst overhead, thousands of glowing drone lights form patterns in the sky, spotlights sweep across a crowd of light. Sweeping crane shot circling the stage, then a wide epic reveal of the whole city celebrating. Joyful, triumphant, vibrant."
+      "negative_prompt": "jacket, hoodie, coat, blurry, low quality, distorted, extra limbs, deformed face, deformed hands, text, letters, captions, subtitles, watermark, logo, static image, flicker",
+      "prompt": "Grand finale on a colossal floating stage above a futuristic night city. An anime girl with a long purple braided ponytail, white sleeveless zip-up crop top, white cargo mini skirt with silver chains and white platform sneakers dances at center stage. Beside her, three small white robots dance in sync: one with a round head and orange dome visor, one boxy with a rectangular head and blue eye-bars, one sleek with a green single eye and wing fins. Fireworks made of light particles burst overhead, thousands of glowing drone lights form patterns in the sky, spotlights sweep across a crowd of light. Sweeping crane shot circling the stage, then a wide epic reveal of the whole city celebrating. Joyful, triumphant, vibrant."
     },
     {
       "id": "09",
       "lyric": "讓電影 讓音樂 讓動畫重新醒來 / 讓想像成真 讓未來發生",
       "duration": 15,
       "seed": 20260909,
-      "first_frame": "film/refs/zhiqi_white.jpg",
-      "prompt": "A realistic young Taiwanese man in a white shirt and jeans sits in a dark studio, resting his chin on his clasped hands, gazing at a single floating screen of light. On the screen, the floating city, the dancing anime girl and the three small robots shrink together into one bright point of light. He smiles softly. The point of light drifts toward the camera, and the whole scene dissolves into a clean white glow, like a blank page waiting for the next idea. Slow pull-back, gentle dolly, quiet and hopeful, ending on pure white light."
+      "first_frame": "film/refs/zhiqi_white_wide.jpg",
+      "prompt": "A realistic young Taiwanese man in a white shirt and jeans sits with his chin resting on his clasped hands. The studio around him darkens and a single floating screen of light appears in front of him. On the screen, a floating city, a dancing anime girl with a purple ponytail and three small white robots shrink together into one bright point of light. He smiles softly. The point of light drifts toward the camera, and the whole scene dissolves into a clean white glow, like a blank page waiting for the next idea. Slow pull-back, gentle dolly, quiet and hopeful, ending on pure white light."
     }
   ]
 }

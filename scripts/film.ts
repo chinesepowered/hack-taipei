@@ -138,7 +138,8 @@ async function poll(sb: Storyboard, state: State, only?: string) {
       const data = await res.json();
       e.status = data.status;
       if (data.status === "success") {
-        const url: string = data.outcome?.video_url;
+        const url: string | undefined = data.outcome?.media_urls?.[0]?.url ?? data.outcome?.video_url;
+        if (!url) throw new Error(`[${shot.id}] success but no media url: ${JSON.stringify(data.outcome).slice(0, 300)}`);
         e.video_url = url;
         const file = resolve(CLIPS, `${shot.id}.mp4`);
         const bin = Buffer.from(await (await fetch(url)).arrayBuffer());

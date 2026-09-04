@@ -1,17 +1,20 @@
 /**
  * Track 04 film pipeline on GMI Cloud (Wan video models).
  *
- *   pnpm film dry-run     print every payload, spend nothing
- *   pnpm film submit      submit shots that have no request_id yet (never re-submits), then poll + download
- *   pnpm film poll        poll existing requests, download finished clips
- *   pnpm film stitch      normalize clips, concat, mix narration if present → film/out/final.mp4
- *   pnpm film status      show the state file
+ *   pnpm film dry-run          print every payload (image data URIs abbreviated), spend nothing
+ *   pnpm film submit-one 01    submit a single shot, then poll it. Use this first to validate image input.
+ *   pnpm film submit           submit shots that have no request_id yet (never re-submits), then poll + download
+ *   pnpm film poll             poll existing requests, download finished clips
+ *   pnpm film stitch           normalize clips, concat, mix music/narration → film/out/final.mp4
+ *   pnpm film status           show the state file
  *
  * Storyboard: film/storyboard.json   State (request ids, urls): film/requests.json
  * Every request id is saved to disk the moment it is returned, so a crash or Ctrl-C never bills twice.
+ * `first_frame` / `last_frame` may be a URL or a local image path; local files are sent as base64 data URIs.
+ * If the primary model rejects an image-conditioned request (4xx), the shot is retried once on `fallback_i2v_model`.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
 
@@ -25,6 +28,7 @@ const OUT = resolve(FILM, "out");
 
 type Shot = {
   id: string;
+  lyric?: string;
   prompt: string;
   negative_prompt?: string;
   duration?: number;
@@ -36,6 +40,7 @@ type Shot = {
 type Storyboard = {
   title: string;
   model: string;
+  fallback_i2v_model?: string;
   resolution: "720P" | "1080P";
   ratio: "16:9" | "9:16" | "1:1" | "4:3" | "3:4";
   style: string;
@@ -44,10 +49,10 @@ type Storyboard = {
   music?: string;
   shots: Shot[];
 };
-type Entry = { request_id?: string; status?: string; video_url?: string; file?: string; error?: string; submitted_at?: string };
+type Entry = { request_id?: string; model?: string; status?: string; video_url?: string; file?: string; error?: string; submitted_at?: string };
 type State = Record<string, Entry>;
 
-const cmd = process.argv[2] ?? "dry-run";
+const [, , cmd = "dry-run", arg] = process.argv;
 const key = process.env.GMI_API_KEY;
 
 function loadStoryboard(): Storyboard {
@@ -62,7 +67,15 @@ function saveState(s: State) {
   writeFileSync(STATE, JSON.stringify(s, null, 2));
 }
 
-function payloadFor(sb: Storyboard, shot: Shot) {
+function imageRef(ref: string): string {
+  if (/^(https?:|data:)/.test(ref)) return ref;
+  const p = resolve(ROOT, ref);
+  if (!existsSync(p)) throw new Error(`reference image not found: ${ref}`);
+  const mime = extname(p).toLowerCase() === ".png" ? "image/png" : "image/jpeg";
+  return `data:${mime};base64,${readFileSync(p).toString("base64")}`;
+}
+
+function payloadFor(sb: Storyboard, shot: Shot, model = shot.model ?? sb.model) {
   const prompt = `${shot.prompt}\n\n${sb.style}`.trim().slice(0, 1500);
   const payload: Record<string, unknown> = {
     prompt,
@@ -74,39 +87,46 @@ function payloadFor(sb: Storyboard, shot: Shot) {
     watermark: false,
   };
   if (shot.seed !== undefined) payload.seed = shot.seed;
-  if (shot.first_frame) payload.first_frame = shot.first_frame;
-  if (shot.last_frame) payload.last_frame = shot.last_frame;
-  return { model: shot.model ?? sb.model, payload };
+  if (shot.first_frame) payload.first_frame = imageRef(shot.first_frame);
+  if (shot.last_frame) payload.last_frame = imageRef(shot.last_frame);
+  return { model, payload };
 }
 
-async function submit(sb: Storyboard, state: State) {
-  if (!key) throw new Error("GMI_API_KEY not set");
-  for (const shot of sb.shots) {
-    const e = state[shot.id] ?? {};
-    if (e.request_id) {
-      console.log(`[${shot.id}] already submitted (${e.request_id}), skipping`);
-      continue;
-    }
-    const body = payloadFor(sb, shot);
-    const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
-    const text = await res.text();
-    if (!res.ok) {
-      state[shot.id] = { ...e, error: `${res.status} ${text.slice(0, 300)}` };
-      saveState(state);
-      console.error(`[${shot.id}] submit failed: ${res.status} ${text.slice(0, 300)}`);
-      continue;
-    }
-    const data = JSON.parse(text);
-    state[shot.id] = { request_id: data.request_id, status: data.status ?? "queued", submitted_at: new Date().toISOString() };
-    saveState(state);
-    console.log(`[${shot.id}] queued ${data.request_id}`);
+async function post(body: unknown) {
+  const res = await fetch(API, { method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
+  return { ok: res.ok, status: res.status, text: await res.text() };
+}
+
+async function submitShot(sb: Storyboard, state: State, shot: Shot) {
+  const e = state[shot.id] ?? {};
+  if (e.request_id) {
+    console.log(`[${shot.id}] already submitted (${e.request_id}), skipping`);
+    return;
   }
+  let body = payloadFor(sb, shot);
+  let r = await post(body);
+  if (!r.ok && r.status >= 400 && r.status < 500 && shot.first_frame && sb.fallback_i2v_model && body.model !== sb.fallback_i2v_model) {
+    console.warn(`[${shot.id}] ${body.model} rejected image input (${r.status}): ${r.text.slice(0, 200)}\n   → retrying on ${sb.fallback_i2v_model}`);
+    body = payloadFor(sb, shot, sb.fallback_i2v_model);
+    r = await post(body);
+  }
+  if (!r.ok) {
+    state[shot.id] = { ...e, error: `${r.status} ${r.text.slice(0, 300)}` };
+    saveState(state);
+    console.error(`[${shot.id}] submit failed: ${r.status} ${r.text.slice(0, 300)}`);
+    return;
+  }
+  const data = JSON.parse(r.text);
+  state[shot.id] = { request_id: data.request_id, model: body.model, status: data.status ?? "queued", submitted_at: new Date().toISOString() };
+  saveState(state);
+  console.log(`[${shot.id}] queued ${data.request_id} on ${body.model}`);
 }
 
-async function poll(sb: Storyboard, state: State) {
+async function poll(sb: Storyboard, state: State, only?: string) {
   if (!key) throw new Error("GMI_API_KEY not set");
   mkdirSync(CLIPS, { recursive: true });
-  const pending = () => sb.shots.filter((s) => state[s.id]?.request_id && !state[s.id]?.file && state[s.id]?.status !== "failed" && state[s.id]?.status !== "cancelled");
+  const shots = only ? sb.shots.filter((s) => s.id === only) : sb.shots;
+  const pending = () => shots.filter((s) => state[s.id]?.request_id && !state[s.id]?.file && state[s.id]?.status !== "failed" && state[s.id]?.status !== "cancelled");
   while (pending().length) {
     for (const shot of pending()) {
       const e = state[shot.id];
@@ -124,10 +144,10 @@ async function poll(sb: Storyboard, state: State) {
         const bin = Buffer.from(await (await fetch(url)).arrayBuffer());
         writeFileSync(file, bin);
         e.file = file;
-        console.log(`[${shot.id}] success → ${file} (${(bin.length / 1e6).toFixed(1)} MB)`);
+        console.log(`\n[${shot.id}] success → ${file} (${(bin.length / 1e6).toFixed(1)} MB)`);
       } else if (data.status === "failed" || data.status === "cancelled") {
-        e.error = JSON.stringify(data).slice(0, 300);
-        console.error(`[${shot.id}] ${data.status}: ${e.error}`);
+        e.error = JSON.stringify(data).slice(0, 400);
+        console.error(`\n[${shot.id}] ${data.status}: ${e.error}`);
       } else {
         process.stdout.write(`[${shot.id}] ${data.status}  `);
       }
@@ -135,7 +155,7 @@ async function poll(sb: Storyboard, state: State) {
     }
     if (pending().length) {
       process.stdout.write("\n");
-      await new Promise((r) => setTimeout(r, 10_000));
+      await new Promise((r) => setTimeout(r, 15_000));
     }
   }
   console.log("all requests settled");
@@ -159,12 +179,8 @@ function stitch(sb: Storyboard, state: State) {
       continue;
     }
     const dst = resolve(OUT, `norm_${shot.id}.mp4`);
-    // uniform size/fps, guarantee an audio track so concat never breaks on a silent clip
-    ffmpeg([
-      "-i", src, "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
-      "-filter_complex", `[0:v]scale=${size}:force_original_aspect_ratio=decrease,pad=${size}:(ow-iw)/2:(oh-ih)/2,fps=24,format=yuv420p[v];[0:a]anull[a0]`,
-      "-map", "[v]", "-map", "[a0]?", "-map", "1:a", "-shortest", "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-c:a", "aac", dst,
-    ]);
+    // uniform size/fps, video only. Audio is added at the end from the storyboard's music/narration.
+    ffmpeg(["-i", src, "-an", "-vf", `scale=${size}:force_original_aspect_ratio=decrease,pad=${size}:(ow-iw)/2:(oh-ih)/2,fps=24,format=yuv420p`, "-c:v", "libx264", "-preset", "medium", "-crf", "18", dst]);
     norm.push(dst);
   }
   if (!norm.length) throw new Error("nothing to stitch");
@@ -173,15 +189,17 @@ function stitch(sb: Storyboard, state: State) {
   const joined = resolve(OUT, "joined.mp4");
   ffmpeg(["-f", "concat", "-safe", "0", "-i", list, "-c", "copy", joined]);
 
-  let final = joined;
-  const tracks: string[] = [];
-  if (sb.narration && existsSync(resolve(ROOT, sb.narration))) tracks.push(resolve(ROOT, sb.narration));
-  if (sb.music && existsSync(resolve(ROOT, sb.music))) tracks.push(resolve(ROOT, sb.music));
+  const tracks = [sb.narration, sb.music].filter((t): t is string => !!t && existsSync(resolve(ROOT, t))).map((t) => resolve(ROOT, t));
+  const final = resolve(OUT, "final.mp4");
   if (tracks.length) {
-    final = resolve(OUT, "final.mp4");
     const inputs = tracks.flatMap((t) => ["-i", t]);
-    const mix = tracks.map((_, i) => `[${i + 1}:a]${i === 1 ? "volume=0.25" : "anull"}[t${i}]`).join(";") + ";" + tracks.map((_, i) => `[t${i}]`).join("") + `amix=inputs=${tracks.length}:duration=first:dropout_transition=2[a]`;
-    ffmpeg(["-i", joined, ...inputs, "-filter_complex", mix, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-shortest", final]);
+    const mix =
+      tracks.length === 1
+        ? "[1:a]afade=t=out:st=131:d=3[a]"
+        : "[1:a]anull[t0];[2:a]volume=0.3[t1];[t0][t1]amix=inputs=2:duration=first:dropout_transition=2[a]";
+    ffmpeg(["-i", joined, ...inputs, "-filter_complex", mix, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", final]);
+  } else {
+    ffmpeg(["-i", joined, "-c", "copy", final]);
   }
   console.log(`done → ${final}`);
 }
@@ -193,11 +211,24 @@ async function main() {
   console.log(`${sb.title}: ${sb.shots.length} shots, ${total}s total, model ${sb.model}, ${sb.resolution} ${sb.ratio}`);
   switch (cmd) {
     case "dry-run":
-      for (const s of sb.shots) console.log(JSON.stringify(payloadFor(sb, s), null, 1));
+      for (const s of sb.shots) {
+        const p = payloadFor(sb, s);
+        const shown = { ...p, payload: { ...p.payload, first_frame: p.payload.first_frame ? `${String(p.payload.first_frame).slice(0, 40)}… (${String(p.payload.first_frame).length} chars)` : undefined } };
+        console.log(JSON.stringify(shown, null, 1));
+      }
       console.log(`\nwould submit ${sb.shots.filter((s) => !state[s.id]?.request_id).length} new requests`);
       break;
+    case "submit-one": {
+      if (!key) throw new Error("GMI_API_KEY not set");
+      const shot = sb.shots.find((s) => s.id === arg);
+      if (!shot) throw new Error(`no shot ${arg}`);
+      await submitShot(sb, state, shot);
+      await poll(sb, state, shot.id);
+      break;
+    }
     case "submit":
-      await submit(sb, state);
+      if (!key) throw new Error("GMI_API_KEY not set");
+      for (const shot of sb.shots) await submitShot(sb, state, shot);
       await poll(sb, state);
       break;
     case "poll":

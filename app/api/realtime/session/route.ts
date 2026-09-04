@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "OPENAI_API_KEY is not set" }, { status: 500 });
-  const model = process.env.REALTIME_MODEL || "gpt-realtime";
+  const model = process.env.REALTIME_MODEL || "gpt-realtime-2.1-mini";
   const voice = process.env.REALTIME_VOICE || "marin";
   const body = await req.json().catch(() => ({}));
   const mode: "auto" | "ptt" = body.mode === "ptt" ? "ptt" : "auto";

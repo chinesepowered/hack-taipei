@@ -9,13 +9,14 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run lib",
     "compile": "node --import=tsx scripts/compile.ts",
     "fund": "node --env-file=.env --import=tsx scripts/fund.ts",
     "deploy": "node --env-file=.env --import=tsx scripts/deploy.ts",
     "smoke": "node --env-file=.env --import=tsx scripts/smoke.ts",
     "film": "node --env-file=.env --import=tsx scripts/film.ts",
-    "concept": "node --import=tsx scripts/concept.ts"
+    "concept": "node --import=tsx scripts/concept.ts",
+    "test:chain": "node --env-file=.env node_modules/vitest/vitest.mjs run contracts"
   },
   "dependencies": {
     "next": "^16.3.4",

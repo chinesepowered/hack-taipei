@@ -2,9 +2,10 @@
  * Deploys GuardedWallet to Base Sepolia and allowlists the contacts marked `allowlisted`.
  * Run: pnpm deploy   (reads .env)
  */
-import { createPublicClient, createWalletClient, http, parseUnits, type Hex } from "viem";
+import { createPublicClient, createWalletClient, fallback, http, parseUnits, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
+import { RPC_URLS } from "../lib/chain/client";
 import artifact from "../lib/chain/GuardedWallet.json" with { type: "json" };
 import { CONTACTS } from "../lib/contacts";
 
@@ -14,7 +15,8 @@ function need(name: string): string {
   return v;
 }
 
-const rpc = process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org";
+// Same four-endpoint fallback the app uses, so the reproduction path is as resilient as the demo.
+const rpc = () => fallback(RPC_URLS.map((u) => http(u, { timeout: 8_000, retryCount: 1 })), { rank: false });
 const usdc = need("NEXT_PUBLIC_USDC_ADDRESS") as Hex;
 const owner = privateKeyToAccount(need("OWNER_PRIVATE_KEY") as Hex);
 const g1 = privateKeyToAccount(need("GUARDIAN1_PRIVATE_KEY") as Hex);
@@ -22,8 +24,8 @@ const g2 = privateKeyToAccount(need("GUARDIAN2_PRIVATE_KEY") as Hex);
 const threshold = BigInt(process.env.GUARDIAN_THRESHOLD ?? "2");
 const dailyLimit = parseUnits(process.env.DAILY_LIMIT_USDC ?? "200", 6);
 
-const publicClient = createPublicClient({ chain: baseSepolia, transport: http(rpc) });
-const wallet = createWalletClient({ account: owner, chain: baseSepolia, transport: http(rpc) });
+const publicClient = createPublicClient({ chain: baseSepolia, transport: rpc() });
+const wallet = createWalletClient({ account: owner, chain: baseSepolia, transport: rpc() });
 
 async function main() {
   const eth = await publicClient.getBalance({ address: owner.address });

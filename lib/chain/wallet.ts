@@ -1,6 +1,7 @@
 import { decodeEventLog, formatUnits, type Address, type Hex } from "viem";
 import { ABI, EXPLORER_URL, WALLET_ADDRESS, assertConfigured, guardianWallet, ownerWallet, publicClient } from "./client";
 import { getMeta, setMeta, type ProposalMeta } from "../store";
+import { isDeterministicRevert } from "../errors";
 export { resolveRecipient } from "../contacts";
 
 export const STATUS = ["pending", "executed", "rejected"] as const;
@@ -32,6 +33,9 @@ async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 5, d
     } catch (e) {
       last = e;
       const msg = e instanceof Error ? e.message : String(e);
+      // A custom error from the contract (AlreadyDecided, GuardiansRequired, ...) or an ERC-20 balance revert
+      // will not change on retry; surface it immediately instead of 15 seconds of backoff.
+      if (isDeterministicRevert(msg)) break;
       const retryable = /revert|execution reverted|estimateGas|out of bounds|panic|nonce too low|replacement/i.test(msg);
       if (!retryable || i === attempts - 1) break;
       console.warn(`[chain] ${label} attempt ${i + 1} failed, retrying: ${msg.split("\n")[0]}`);
@@ -39,6 +43,13 @@ async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 5, d
     }
   }
   throw last;
+}
+
+/** A transaction that mined but reverted must not be reported as success with a BaseScan link that says Fail. */
+async function waitForSuccess(hash: Hex, label: string) {
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") throw new Error(`${label} reverted on-chain (tx ${hash})`);
+  return receipt;
 }
 
 export async function getWalletState(): Promise<WalletState> {
@@ -69,7 +80,7 @@ export async function payDirect(p: { to: Address; amount: bigint; memo: string }
   assertConfigured();
   const wallet = ownerWallet();
   const hash = await withRetry("pay", () => wallet.writeContract({ address: WALLET_ADDRESS, abi: ABI, functionName: "pay", args: [p.to, p.amount, p.memo] }));
-  await publicClient.waitForTransactionReceipt({ hash });
+  await waitForSuccess(hash, "pay");
   return { hash, url: txUrl(hash) };
 }
 
@@ -80,7 +91,7 @@ export async function proposePayment(p: { to: Address; amount: bigint; memo: str
   const hash = await withRetry("propose", () =>
     wallet.writeContract({ address: WALLET_ADDRESS, abi: ABI, functionName: "propose", args: [p.to, p.amount, p.memo, risk] }),
   );
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const receipt = await waitForSuccess(hash, "propose");
   let id = -1;
   for (const log of receipt.logs) {
     try {
@@ -109,7 +120,7 @@ export async function guardianDecide(p: { proposalId: number; guardianIndex: num
       args: [BigInt(p.proposalId)],
     }),
   );
-  await publicClient.waitForTransactionReceipt({ hash });
+  await waitForSuccess(hash, p.decision);
   const meta = getMeta(p.proposalId);
   setMeta(p.proposalId, {
     ...(meta ?? { recipientName: "", recipientInput: "", reason: "", callerClaims: "", explanation: "", pattern: "", riskScore: 0, createdAt: Date.now() }),

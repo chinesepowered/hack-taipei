@@ -7,6 +7,16 @@ import type { AgentState } from "@/lib/realtime/client";
  * idle: soft smile. listening: ears up, eyes wide. thinking: eyes to the side. speaking: mouth open, bounce.
  * worried: brows in, ears down, frown. happy: closed happy eyes, tongue out.
  */
+const STATE_ZH: Record<AgentState, string> = {
+  idle: "在休息",
+  connecting: "醒來中",
+  listening: "在聽",
+  thinking: "在想",
+  speaking: "在說話",
+  worried: "覺得怪怪的",
+  happy: "很開心",
+};
+
 export function Beagle({ state, size = 320 }: { state: AgentState; size?: number }) {
   const worried = state === "worried";
   const happy = state === "happy";
@@ -18,7 +28,7 @@ export function Beagle({ state, size = 320 }: { state: AgentState; size?: number
   const pupilX = thinking ? 6 : 0;
 
   return (
-    <svg viewBox="0 0 200 200" width={size} height={size} className={`beagle beagle-${state}`} aria-label={`豆豆 ${state}`}>
+    <svg viewBox="0 0 200 200" width={size} height={size} className={`beagle beagle-${state}`} role="img" aria-label={`豆豆${STATE_ZH[state]}`}>
       <defs>
         <radialGradient id="cheek" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#f6a6a0" stopOpacity=".9" />

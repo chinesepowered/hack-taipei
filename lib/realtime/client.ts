@@ -13,6 +13,8 @@
 export type AgentState = "idle" | "connecting" | "listening" | "thinking" | "speaking" | "worried" | "happy";
 export type TurnMode = "auto" | "ptt";
 
+import { demoHeaders } from "../demoClient";
+
 export type TranscriptLine = { role: "ahma" | "doudou" | "system"; text: string; at: number };
 
 export type Callbacks = {
@@ -56,6 +58,13 @@ export class RealtimeSession {
     this.pc = new RTCPeerConnection();
     this.pc.ontrack = (e) => {
       this.audio.srcObject = e.streams[0];
+    };
+    // A dropped venue connection used to leave the UI on 「豆豆在聽」 forever. Say so instead.
+    this.pc.onconnectionstatechange = () => {
+      const st = this.pc?.connectionState;
+      if (st === "failed" || st === "disconnected" || st === "closed") {
+        if (this.pc) this.cb.onError?.("network: realtime connection " + st);
+      }
     };
     this.mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
@@ -215,7 +224,7 @@ export class RealtimeSession {
           };
         }
         case "execute_payment": {
-          const p = await fetch("/api/wallet/pay", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args) }).then((r) =>
+          const p = await fetch("/api/wallet/pay", { method: "POST", headers: { "content-type": "application/json", ...demoHeaders() }, body: JSON.stringify(args) }).then((r) =>
             r.json(),
           );
           this.cb.onPayment?.(p);

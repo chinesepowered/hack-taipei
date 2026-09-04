@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { captureDemoKey, demoHeaders } from "@/lib/demoClient";
+import { toZh, type ZhError } from "@/lib/errors";
 
 type Decision = { guardian: string; decision: "approve" | "reject"; hash: string; at: number };
 type Proposal = {
@@ -15,26 +17,34 @@ type Proposal = {
   createdAt: number;
   meta: { recipientName: string; reason: string; callerClaims: string; explanation: string; pattern: string; decisions?: Decision[] } | null;
 };
-type Data = { proposals: Proposal[]; guardians: { index: number; name: string }[]; explorer: string; wallet: string; error?: string };
+type Data = { proposals?: Proposal[]; guardians?: { index: number; name: string }[]; explorer?: string; wallet?: string; error?: string; detail?: string };
 
 const STATUS_ZH = { pending: "等你決定", executed: "已付款", rejected: "已擋下" } as const;
+const DEFAULT_GUARDIANS = [
+  { index: 1, name: "媽媽" },
+  { index: 2, name: "孫子小凱" },
+];
 
 export default function FamilyPage() {
   const [data, setData] = useState<Data | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [me, setMe] = useState(1);
   const [busy, setBusy] = useState<number | null>(null);
-  const [err, setErr] = useState("");
+  const [err, setErr] = useState<ZhError | null>(null);
 
   async function load() {
     try {
-      const d = await fetch("/api/proposals").then((r) => r.json());
+      const d: Data = await fetch("/api/proposals").then((r) => r.json());
       setData(d);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
+      setData({ error: toZh(e).text, detail: toZh(e).detail });
+    } finally {
+      setLoaded(true);
     }
   }
 
   useEffect(() => {
+    captureDemoKey();
     load();
     const t = setInterval(load, 3000);
     return () => clearInterval(t);
@@ -42,26 +52,29 @@ export default function FamilyPage() {
 
   async function decide(id: number, decision: "approve" | "reject") {
     setBusy(id);
-    setErr("");
+    setErr(null);
     try {
       const r = await fetch(`/api/proposals/${id}`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...demoHeaders() },
         body: JSON.stringify({ guardian: me, decision }),
       }).then((r) => r.json());
-      if (r.error) setErr(r.error);
+      if (r.error) setErr({ text: r.error, detail: r.detail });
       await load();
+    } catch (e) {
+      setErr(toZh(e));
     } finally {
       setBusy(null);
     }
   }
 
-  const guardians = data?.guardians ?? [
-    { index: 1, name: "媽媽" },
-    { index: 2, name: "孫子小凱" },
-  ];
-  const pending = data?.proposals.filter((p) => p.status === "pending") ?? [];
-  const done = data?.proposals.filter((p) => p.status !== "pending") ?? [];
+  // The API answers { error } on any chain hiccup. That must never take the page down on the judges' phone.
+  const proposals = Array.isArray(data?.proposals) ? data!.proposals! : [];
+  const guardians = data?.guardians?.length ? data.guardians : DEFAULT_GUARDIANS;
+  const explorer = data?.explorer ?? "https://sepolia.basescan.org";
+  const pending = proposals.filter((p) => p.status === "pending");
+  const done = proposals.filter((p) => p.status !== "pending");
+  const apiError = data?.error ? toZh(data.error) : null;
 
   return (
     <main className="shell">
@@ -73,7 +86,7 @@ export default function FamilyPage() {
         <nav>
           <Link href="/">阿嬤頁面</Link>
           {data?.wallet && (
-            <a href={`${data.explorer}/address/${data.wallet}`} target="_blank" rel="noreferrer">
+            <a href={`${explorer}/address/${data.wallet}`} target="_blank" rel="noreferrer">
               鏈上錢包
             </a>
           )}
@@ -84,7 +97,7 @@ export default function FamilyPage() {
         <div className="persona">
           <span>我是：</span>
           {guardians.map((g) => (
-            <button key={g.index} className={me === g.index ? "on" : ""} onClick={() => setMe(g.index)}>
+            <button key={g.index} className={me === g.index ? "on" : ""} onClick={() => setMe(g.index)} aria-pressed={me === g.index}>
               {g.name}
             </button>
           ))}
@@ -92,23 +105,38 @@ export default function FamilyPage() {
             核准需要兩位家人，擋下只要一位。
           </span>
         </div>
-        {err && <div className="err" style={{ marginTop: 10 }}>{err}</div>}
-        {data?.error && <div className="err" style={{ marginTop: 10 }}>{data.error}</div>}
+        {err && (
+          <div className="err" style={{ marginTop: 10 }} role="alert">
+            {err.text}
+            {err.detail && <small>{err.detail}</small>}
+          </div>
+        )}
+        {apiError && (
+          <div className="err" style={{ marginTop: 10 }} role="alert">
+            {apiError.text}
+            {apiError.detail && <small>{apiError.detail}</small>}
+          </div>
+        )}
+        <div className="notice">
+          Demo 說明：兩位家人的簽章是兩個獨立的鏈上地址、兩筆真的交易；為了現場穩定，金鑰暫時由伺服器代簽。正式版由家人自己的錢包或 passkey 簽。
+        </div>
       </section>
 
       <section className="card" style={{ marginBottom: 20 }}>
         <h2>等待決定</h2>
-        {pending.length === 0 && <div className="empty">目前沒有需要你決定的付款。</div>}
+        {!loaded && <div className="loading">讀取中…</div>}
+        {loaded && pending.length === 0 && <div className="empty">目前沒有需要你決定的付款。</div>}
         {pending.map((p) => (
-          <ProposalCard key={p.id} p={p} explorer={data!.explorer} busy={busy === p.id} onDecide={decide} />
+          <ProposalCard key={p.id} p={p} explorer={explorer} busy={busy === p.id} onDecide={decide} />
         ))}
       </section>
 
       <section className="card">
         <h2>紀錄</h2>
-        {done.length === 0 && <div className="empty">還沒有紀錄。</div>}
+        {!loaded && <div className="loading">讀取中…</div>}
+        {loaded && done.length === 0 && <div className="empty">還沒有紀錄。</div>}
         {done.map((p) => (
-          <ProposalCard key={p.id} p={p} explorer={data!.explorer} busy={false} onDecide={decide} />
+          <ProposalCard key={p.id} p={p} explorer={explorer} busy={false} onDecide={decide} />
         ))}
       </section>
     </main>

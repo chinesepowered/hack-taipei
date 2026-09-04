@@ -75,7 +75,7 @@ export async function assessPayment(raw: unknown): Promise<Assessment> {
   const apiKey = process.env.SHIELD_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) return fallback;
   const baseUrl = (process.env.SHIELD_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
-  const model = process.env.SHIELD_MODEL || "gpt-5-mini";
+  const model = process.env.SHIELD_MODEL || "gpt-5.6-luna";
 
   const system = `你是「豆豆」背後的詐騙防護盾，服務台灣的長輩。根據 165 反詐騙常見手法評估這筆付款的風險。
 規則層已經先掃過關鍵字，結果附在下面，你可以調高或調低分數，但要合理。

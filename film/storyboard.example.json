@@ -13,7 +13,7 @@
       "prompt": "TODO: shot 1 action. Describe the character exactly as in the provided design, the setting, camera move, and mood.",
       "duration": 15,
       "seed": 1001,
-      "first_frame": "https://raw.githubusercontent.com/chinesepowered/hack-taipei/main/film/assets/TODO-character.png"
+      "first_frame": "film/refs/TODO-character.png  (local only: organizer art must never be committed or hosted; scripts/film.ts uploads it per request)"
     },
     {
       "id": "02",

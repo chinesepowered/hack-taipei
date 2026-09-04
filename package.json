@@ -1,0 +1,34 @@
+{
+  "name": "grandmas-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "阿嬤的錢包 — an AI voice agent that says no to scammers, backed by an on-chain guardian wallet.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "compile": "node --import=tsx scripts/compile.ts",
+    "fund": "node --env-file=.env --import=tsx scripts/fund.ts",
+    "deploy": "node --env-file=.env --import=tsx scripts/deploy.ts",
+    "smoke": "node --env-file=.env --import=tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "next": "^16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "viem": "^2.56.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "solc": "^0.8.36",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}

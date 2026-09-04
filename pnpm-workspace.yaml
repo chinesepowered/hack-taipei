@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@types/react-dom@19.2.7'
+  - '@vitest/mocker@5.0.0'
+  - '@vitest/spy@5.0.0'
+  - vitest@5.0.0
+# solc pins tmp@0.0.33 (GHSA-ph9p-34f9-6g65 high, GHSA-52f5-9888-hmc6 low). We only use solc's library API, not its CLI.
+overrides:
+  tmp: '>=0.2.6'

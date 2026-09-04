@@ -54,10 +54,10 @@ README template and submission checklist are downloadable from the Resources sec
 ## Judging
 
 **Round 1 (書審, all entries → top 10):** judged on the video, code, and docs only. Nobody sees a live demo in Round 1. The 2-minute video is the single most important artifact.
-Scoring pie chart (4 slices) exists on the site but the percentages are client-rendered and were not captured. **TODO: open the site, click the Round 1 chart, and record the 4 categories + weights.**
+Scoring pie chart (4 slices) exists on the site but the percentages are client-rendered and were not captured. Check the chart on the site for the 4 categories and weights.
 
 **Round 2 (Demo, top 10 → top 3):** 5 minutes per team: 3 min demo, 1 min judge questions, 1 min answers. Bring your own laptop.
-Scoring pie chart (5 slices), also not captured. **TODO: record the 5 categories + weights.**
+Scoring pie chart (5 slices), also not captured. Check the chart on the site for the 5 categories and weights.
 
 ### Judges (Round 2 panel)
 

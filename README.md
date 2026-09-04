@@ -8,25 +8,30 @@
 
 | 項目 | 連結 |
 |---|---|
-| 評選影片（2 分鐘） | _TODO：YouTube 連結_ |
-| 作品展示網址 | _TODO：Demo 網址_ |
+| 程式碼儲存庫 | https://github.com/chinesepowered/hack-taipei |
+| 評選影片（2 分鐘） | 依繳交表單所附 YouTube 連結 |
 | 鏈上錢包合約（Base Sepolia） | [0x6375461086204bd26700fa2ab2bec77f005d7a57](https://sepolia.basescan.org/address/0x6375461086204bd26700fa2ab2bec77f005d7a57) |
 | 授權 | MIT（見 [LICENSE](./LICENSE)） |
 | Demo 腳本與備援 | [DEMO.md](./DEMO.md) |
+| 簡報 | [slides_tw.html](./slides_tw.html) · [slides_en.html](./slides_en.html) |
+
+## 作品摘要
+
+台灣每年詐騙財損超過新台幣 500 億元，長輩是最大的受害者，而家人往往在錢匯出後才知道。阿嬤的錢包是一個「用講的」錢包助理「豆豆」：長輩用手機直接說要付錢給誰，豆豆先依 165 常見詐騙手法評估風險，用長輩聽得懂的話解釋，並在可疑時主動提議打給家人。錢放在 Base 鏈上的守護合約裡：常用收款人、額度內直接付；其他一律變成提案，要兩位家人在鏈上核准才放行，任一位家人就能擋下，額度只有家人能改。就算長輩被說服，錢也匯不出去。全部開源，三天內完成。
 
 ## 隊伍
 
 | 成員 | 負責 |
 |---|---|
-| _TODO_ | 語音代理人、詐騙防護盾 |
-| _TODO_ | 智慧合約、家人共簽 |
-| _TODO_ | 前端、豆豆、影片、簡報 |
+| （隊員一） | 語音代理人、詐騙防護盾 |
+| （隊員二） | 智慧合約、家人共簽 |
+| （隊員三） | 前端、豆豆、影片、簡報 |
 
 ---
 
 ## 一、問題
 
-台灣每年因詐騙造成的財損超過新台幣 500 億元（來源：內政部警政署 165 打詐儀錶板，簡報前請再次核對最新數字）。受害最深的是長輩：
+台灣每年因詐騙造成的財損超過新台幣 500 億元（來源：內政部警政署 165 打詐儀錶板）。受害最深的是長輩：
 
 - 「阿嬤，我是你孫子，我出事了，今天一定要匯 30 萬。」這類假冒親友、假冒檢警的電話，長輩在慌張之下往往直接跑去 ATM。
 - 家人通常在錢已經匯出之後才知道。
@@ -38,7 +43,7 @@
 
 阿嬤的錢包是一個「用講的」錢包代理人「豆豆」（一隻米格魯），搭配一個上鏈的守護錢包合約：
 
-1. **語音代理人 豆豆**：長輩用手機或喇叭直接說「幫我付 20 元給阿明」，豆豆用親切的台灣口語回應、確認、執行。把電話開擴音，豆豆會陪她一起聽。
+1. **語音代理人 豆豆**：長輩用手機或喇叭直接說「幫我付 20 元給阿明」，豆豆用親切的台灣口語回應、確認、執行。把電話開擴音，豆豆會陪她一起聽。吵雜環境可切換「按住說話」模式。
 2. **詐騙防護盾 Scam Shield**：每一筆付款前，先由規則層比對 165 常見詐騙手法（假冒親友、假冒檢警、監管帳戶、解除分期、投資群組、催促保密），再由 LLM 結構化輸出風險分數與白話解釋。高風險交易會被暫停，豆豆用長輩聽得懂的方式解釋為什麼可疑，並主動提議「我幫你打給孫子確認好不好？」
 3. **守護錢包合約 GuardedWallet**：錢放在鏈上的智慧合約裡。常用收款人白名單 + 每日額度內才能直接付；其他交易一律變成提案，要 2 位家人在鏈上核准才放行，任 1 位家人就能擋下。額度只有家人能改。**就算阿嬤被說服，錢也匯不出去。**
 4. **家人共簽頁面**：家人手機看到豆豆整理好的判斷、來電者說了什麼，按一下「核准」或「擋下」，簽章直接上鏈。決定一出來，豆豆會立刻告訴阿嬤。
@@ -81,11 +86,11 @@
 
 | 層 | 技術 | 說明 |
 |---|---|---|
-| 前端 / API | Next.js 15（App Router）、TypeScript、pnpm | `/` 阿嬤頁面、`/family` 家人頁面、API routes |
-| 即時語音與代理人 | OpenAI Realtime API（`gpt-realtime-2.1-mini`，WebRTC） | 語音進、語音出、可打斷、function calling；伺服器只發短效 client secret |
+| 前端 / API | Next.js 16（App Router）、TypeScript、pnpm | `/` 阿嬤頁面、`/family` 家人頁面、API routes |
+| 即時語音與代理人 | OpenAI Realtime API（`gpt-realtime-2.1-mini`，WebRTC） | 語音進、語音出、可打斷、function calling；伺服器只發短效 client secret。自動偵測與「按住說話」兩種模式 |
 | 詐騙偵測 | 規則引擎 + `gpt-5.6-luna` structured outputs | 模型失敗時自動退回規則層，不會中斷 Demo。可用 `SHIELD_BASE_URL` 指到任何 OpenAI 相容端點 |
 | 智慧合約 | Solidity 0.8、solc-js 編譯、viem 部署 | 不需要 Foundry，`pnpm compile` 直接出 ABI |
-| 區塊鏈 | Base Sepolia、Circle 測試 USDC | 出塊 2 秒，水龍頭好拿，BaseScan 可即時展示 |
+| 區塊鏈 | Base Sepolia、Circle 測試 USDC | 出塊 2 秒，水龍頭好拿，BaseScan 可即時展示；四個公開 RPC 自動備援 |
 | 錢包互動 | viem | agent 與家人金鑰在伺服器端簽章（Demo 用），未來換成家人自己的 passkey / 錢包 |
 | 吉祥物 | 手繪 SVG 米格魯「豆豆」 | 表情跟著代理人狀態變：聽、想、說、擔心、開心 |
 
@@ -112,8 +117,8 @@
 ### 1. 安裝
 
 ```bash
-git clone https://github.com/_TODO_/grandmas-wallet.git
-cd grandmas-wallet
+git clone https://github.com/chinesepowered/hack-taipei.git
+cd hack-taipei
 pnpm install
 cp .env.example .env
 ```
@@ -154,7 +159,7 @@ pnpm fund         # 從 agent 金鑰轉一點 ETH 給兩位家人付 gas
 pnpm deploy       # 部署到 Base Sepolia，並把常用聯絡人加入白名單
 ```
 
-部署後把印出的 `NEXT_PUBLIC_WALLET_ADDRESS` 填回 `.env`，再到 https://faucet.circle.com 領測試 USDC 打進合約地址。
+部署後把印出的 `NEXT_PUBLIC_WALLET_ADDRESS` 填回 `.env`，再到 https://faucet.circle.com 領測試 USDC 打進合約地址。要直接看已部署的版本，用上表的合約地址即可。
 
 ### 4. 啟動
 
@@ -180,11 +185,11 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 ```
 .
 ├── app/
-│   ├── page.tsx                 # 阿嬤頁面：豆豆、風險條、錢包、對話
+│   ├── page.tsx                 # 阿嬤頁面：豆豆、風險條、錢包、對話、按住說話
 │   ├── family/page.tsx          # 家人共簽頁面
 │   ├── layout.tsx / globals.css
 │   └── api/
-│       ├── realtime/session/    # 發 Realtime client secret（含 persona 與 tools）
+│       ├── realtime/session/    # 發 Realtime client secret（含 persona、tools、turn 模式）
 │       ├── shield/              # 詐騙風險評分
 │       ├── wallet/balance/      # 鏈上餘額與額度
 │       ├── wallet/pay/          # 直接付款或建立家人提案
@@ -194,15 +199,16 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 │   └── RiskMeter.tsx
 ├── lib/
 │   ├── agent/instructions.ts    # 豆豆的 persona 與 tool 定義
-│   ├── realtime/client.ts       # 瀏覽器端 WebRTC session 與 tool 執行
+│   ├── realtime/client.ts       # 瀏覽器端 WebRTC session、tool 執行、push-to-talk
 │   ├── shield/                  # patterns.ts 規則層、assess.ts LLM 層、測試
-│   ├── chain/                   # viem client、合約呼叫（含 RPC 延遲重試）、編譯後 ABI
+│   ├── chain/                   # viem client（RPC 備援）、合約呼叫（含重試）、編譯後 ABI
 │   ├── contacts.ts              # 阿嬤的聯絡人與白名單
 │   └── store.ts                 # 提案的鏈下說明（.data/proposals.json）
 ├── contracts/GuardedWallet.sol
-├── scripts/                     # compile / fund / deploy / smoke
+├── scripts/                     # compile / fund / deploy / smoke / film / concept
+├── film/                        # Track 04 音樂 MV 的分鏡、生成紀錄、簡報（見附錄）
 ├── slides_en.html · slides_tw.html
-├── DEMO.md                      # 3 分鐘台詞、評審問答、備援
+├── DEMO.md                      # 3 分鐘台詞、評審問答、備援、2 分鐘影片分鏡
 └── hackathon.md                 # 賽事資訊整理
 ```
 
@@ -217,7 +223,7 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 | 賽前準備 | 無既有程式碼；所有程式於 2026/09/04–09/06 賽期內完成 |
 | 模型 | OpenAI `gpt-realtime-2.1-mini`（語音代理人）、`gpt-5.6-luna`（詐騙防護盾）、`gpt-4o-mini-transcribe`（對話字幕） |
 | 資料 | 165 反詐騙宣導公開資料整理而成的詐騙手法清單（`lib/shield/patterns.ts`） |
-| 開源套件 | Next.js、React、viem、zod、solc-js、tsx、vitest |
+| 開源套件 | Next.js、React、viem、zod、solc-js、tsx、vitest、ffmpeg-static |
 | 區塊鏈 | Base Sepolia 測試網、Circle 測試 USDC |
 
 ## 六、素材來源與授權
@@ -228,14 +234,6 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 | 詐騙手法清單 | 內政部警政署 165 全民防騙網公開資訊，由本隊整理 | 政府資料開放授權 |
 | 字型 | Noto Sans TC（Google Fonts） | SIL OFL 1.1 |
 
-## 附：Track 04 科幻音樂 MV《從第一個 Prompt 到最後一個鏡頭》
-
-同隊另外參加 CSFCCA LIVE AI「02 科幻音樂 MV」。9 個鏡頭 × 15 秒，對應官方指定歌曲 2 分 14 秒，使用官方角色 LUNA、志奇與 X-01／X-02／X-03 機器人。以 GMI Cloud 的 Wan 3.0 Video Prime 生成（image-to-video，官方設定稿作第一幀），ffmpeg 串接並套上官方音樂。
-
-- 分鏡與 Prompt：`film/storyboard.json`；生成紀錄（request id、版本比較）：`film/requests.json`
-- 管線：`pnpm film dry-run | submit-one <id> | submit | poll | stitch`，創作理念 PDF：`pnpm concept`
-- 官方素材依規範僅供本賽事使用，不入庫；生成影片與 PDF 輸出於 `film/out/`（不入庫）
-
 ## 七、下一步
 
 - 家人用自己的 passkey 或錢包簽核准，不再由伺服器保管金鑰。
@@ -243,6 +241,14 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 - 台語、客語原生語音。
 - 家人都不在線時，提案冷卻 24 小時後可由阿嬤本人到分行解鎖。
 - 串接銀行託管帳戶，銀行成為共簽人之一。
+
+## 附：Track 04 科幻音樂 MV《從第一個 Prompt 到最後一個鏡頭》
+
+同隊另外參加 CSFCCA LIVE AI「02 科幻音樂 MV」，與主作品各自獨立評選。9 個鏡頭 × 15 秒，對應官方指定歌曲 2 分 14 秒，使用官方角色 LUNA、志奇與 X-01／X-02／X-03 機器人。以 GMI Cloud 的 Wan 3.0 Video Prime 生成（image-to-video，官方設定稿作第一幀），ffmpeg 串接並套上官方音樂。
+
+- 分鏡與 Prompt：`film/storyboard.json`；生成紀錄（request id、版本比較）：`film/requests.json`；簡報：`film/slides_film.html`
+- 管線：`pnpm film dry-run | submit-one <id> | submit | poll | stitch`，創作理念 PDF：`pnpm concept`
+- 官方素材依規範僅供本賽事使用，不入庫；生成影片與 PDF 輸出於 `film/out/`（不入庫）
 
 ## 授權
 

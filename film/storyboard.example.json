@@ -1,0 +1,25 @@
+{
+  "title": "TODO: film title",
+  "model": "wan3.0-video-prime",
+  "resolution": "1080P",
+  "ratio": "16:9",
+  "style": "Cinematic sci-fi short film, anamorphic lens, volumetric light, film grain, consistent character design as in the reference frame, no text, no subtitles.",
+  "negative_prompt": "blurry, low quality, distorted, extra limbs, deformed face, text, watermark, subtitles",
+  "narration": "film/narration.mp3",
+  "music": "",
+  "shots": [
+    {
+      "id": "01",
+      "prompt": "TODO: shot 1 action. Describe the character exactly as in the provided design, the setting, camera move, and mood.",
+      "duration": 15,
+      "seed": 1001,
+      "first_frame": "https://raw.githubusercontent.com/chinesepowered/hack-taipei/main/film/assets/TODO-character.png"
+    },
+    {
+      "id": "02",
+      "prompt": "TODO: shot 2",
+      "duration": 15,
+      "seed": 1002
+    }
+  ]
+}

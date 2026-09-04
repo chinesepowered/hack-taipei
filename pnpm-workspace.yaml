@@ -1,5 +1,6 @@
 allowBuilds:
   esbuild: true
+  ffmpeg-static: true
 minimumReleaseAgeExclude:
   - '@types/react-dom@19.2.7'
   - '@vitest/mocker@5.0.0'

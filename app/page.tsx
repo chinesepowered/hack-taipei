@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Beagle } from "@/components/Beagle";
 import { RiskMeter } from "@/components/RiskMeter";
-import { RealtimeSession, type AgentState, type TranscriptLine } from "@/lib/realtime/client";
+import { RealtimeSession, type AgentState, type TranscriptLine, type TurnMode } from "@/lib/realtime/client";
 
 type Wallet = { balance_usdc: string; daily_limit_usdc: string; remaining_today_usdc: string; explorer: string; error?: string };
 type Action = { kind: "paid" | "needs_family" | "executed" | "rejected" | "error"; text: string; url?: string };
@@ -21,6 +21,8 @@ const STATE_TEXT: Record<AgentState, string> = {
 
 export default function AhmaPage() {
   const [state, setState] = useState<AgentState>("idle");
+  const [mode, setMode] = useState<TurnMode>("ptt");
+  const [holding, setHolding] = useState(false);
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [risk, setRisk] = useState<{ score: number | null; pattern?: string; explanation?: string }>({ score: null });
   const [action, setAction] = useState<Action | null>(null);
@@ -40,6 +42,12 @@ export default function AhmaPage() {
   useEffect(() => {
     loadWallet();
     const t = setInterval(loadWallet, 8000);
+    try {
+      const saved = localStorage.getItem("doudou-mode");
+      if (saved === "auto" || saved === "ptt") setMode(saved);
+    } catch {
+      /* ignore */
+    }
     return () => clearInterval(t);
   }, []);
 
@@ -47,25 +55,37 @@ export default function AhmaPage() {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
   }, [lines]);
 
+  function pickMode(m: TurnMode) {
+    setMode(m);
+    try {
+      localStorage.setItem("doudou-mode", m);
+    } catch {
+      /* ignore */
+    }
+  }
+
   async function start() {
     setError("");
     setRisk({ score: null });
     setAction(null);
-    const s = new RealtimeSession({
-      onState: setState,
-      onTranscript: (l) => setLines((prev) => [...prev, l]),
-      onAssessment: (a) => setRisk({ score: a.risk_score, pattern: a.pattern, explanation: a.explanation_zh }),
-      onPayment: (p) => {
-        const status = String(p.status);
-        if (status === "paid") setAction({ kind: "paid", text: `已付 ${p.amount_usdc} 元給${p.recipient}`, url: String(p.url) });
-        else if (status === "needs_family") setAction({ kind: "needs_family", text: `給${p.recipient}的 ${p.amount_usdc} 元已交給家人決定（提案 #${p.proposal_id}）`, url: String(p.url) });
-        else if (status === "executed") setAction({ kind: "executed", text: `家人核准了，${p.amountUsdc} 元已付出去`, url: undefined });
-        else if (status === "rejected") setAction({ kind: "rejected", text: `家人擋下了這筆 ${p.amountUsdc} 元，錢沒有動`, url: undefined });
-        else if (status === "error") setAction({ kind: "error", text: `出錯了：${p.error}` });
-        loadWallet();
+    const s = new RealtimeSession(
+      {
+        onState: setState,
+        onTranscript: (l) => setLines((prev) => [...prev, l]),
+        onAssessment: (a) => setRisk({ score: a.risk_score, pattern: a.pattern, explanation: a.explanation_zh }),
+        onPayment: (p) => {
+          const status = String(p.status);
+          if (status === "paid") setAction({ kind: "paid", text: `已付 ${p.amount_usdc} 元給${p.recipient}`, url: String(p.url) });
+          else if (status === "needs_family") setAction({ kind: "needs_family", text: `給${p.recipient}的 ${p.amount_usdc} 元已交給家人決定（提案 #${p.proposal_id}）`, url: String(p.url) });
+          else if (status === "executed") setAction({ kind: "executed", text: `家人核准了，${p.amountUsdc} 元已付出去` });
+          else if (status === "rejected") setAction({ kind: "rejected", text: `家人擋下了這筆 ${p.amountUsdc} 元，錢沒有動` });
+          else if (status === "error") setAction({ kind: "error", text: `出錯了：${p.error}` });
+          loadWallet();
+        },
+        onError: (m) => setError(m),
       },
-      onError: (m) => setError(m),
-    });
+      mode,
+    );
     session.current = s;
     try {
       await s.connect();
@@ -78,6 +98,19 @@ export default function AhmaPage() {
   function stop() {
     session.current?.disconnect();
     session.current = null;
+    setHolding(false);
+  }
+
+  function holdStart(e: React.PointerEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setHolding(true);
+    session.current?.pttStart();
+  }
+  function holdEnd(e: React.PointerEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    setHolding(false);
+    session.current?.pttStop();
   }
 
   const live = state !== "idle";
@@ -104,16 +137,42 @@ export default function AhmaPage() {
           <Beagle state={state} />
           <div className="name">豆豆</div>
           <div className="state">{STATE_TEXT[state]}</div>
+
+          {!live && (
+            <div className="modes">
+              <button className={mode === "ptt" ? "on" : ""} onClick={() => pickMode("ptt")}>
+                按住說話（吵雜環境）
+              </button>
+              <button className={mode === "auto" ? "on" : ""} onClick={() => pickMode("auto")}>
+                自動聽（安靜環境）
+              </button>
+            </div>
+          )}
+
           {live ? (
-            <button className="bigbtn stop" onClick={stop}>
-              豆豆休息
-            </button>
+            <>
+              {mode === "ptt" && (
+                <button
+                  className={`holdbtn ${holding ? "held" : ""}`}
+                  onPointerDown={holdStart}
+                  onPointerUp={holdEnd}
+                  onPointerCancel={holdEnd}
+                  onPointerLeave={(e) => holding && holdEnd(e)}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  {holding ? "放開就送出" : "按住跟豆豆說話"}
+                </button>
+              )}
+              <button className="bigbtn stop" onClick={stop}>
+                豆豆休息
+              </button>
+            </>
           ) : (
             <button className="bigbtn" onClick={start}>
               跟豆豆說話
             </button>
           )}
-          <div className="hint">開擴音，讓豆豆一起聽電話。</div>
+          <div className="hint">{mode === "ptt" ? "按住按鈕講話，放開後豆豆才回答。開擴音時也按住讓豆豆聽電話。" : "開擴音，讓豆豆一起聽電話。"}</div>
           {error && <div className="err">{error}</div>}
         </section>
 

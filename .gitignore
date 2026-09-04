@@ -7,3 +7,7 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Track 04 film: generated clips and renders are large; keep storyboard + requests.json
+film/clips/
+film/out/

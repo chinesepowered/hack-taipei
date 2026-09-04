@@ -4,8 +4,14 @@
  * Browser-side OpenAI Realtime session over WebRTC.
  * Tool calls from the model are executed against our own API routes and the result is sent back
  * over the data channel, so the model never touches keys or the chain directly.
+ *
+ * Two turn modes:
+ *   auto: server VAD decides when Ah-ma finished talking.
+ *   ptt:  push-to-talk. The mic track is muted until the button is held; releasing commits the turn.
+ *         Immune to background music and to 豆豆 hearing itself through the speakers.
  */
 export type AgentState = "idle" | "connecting" | "listening" | "thinking" | "speaking" | "worried" | "happy";
+export type TurnMode = "auto" | "ptt";
 
 export type TranscriptLine = { role: "ahma" | "doudou" | "system"; text: string; at: number };
 
@@ -27,23 +33,37 @@ export class RealtimeSession {
   private pendingText = "";
   private watched = new Set<number>();
   private poll: ReturnType<typeof setInterval> | null = null;
+  private holding = false;
+  private responding = false;
 
-  constructor(private cb: Callbacks) {
+  constructor(
+    private cb: Callbacks,
+    public readonly mode: TurnMode = "auto",
+  ) {
     this.audio = document.createElement("audio");
     this.audio.autoplay = true;
   }
 
   async connect() {
     this.cb.onState("connecting");
-    const sess = await fetch("/api/realtime/session", { method: "POST" }).then((r) => r.json());
+    const sess = await fetch("/api/realtime/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: this.mode }),
+    }).then((r) => r.json());
     if (!sess.client_secret) throw new Error(sess.error ?? "no client secret");
 
     this.pc = new RTCPeerConnection();
     this.pc.ontrack = (e) => {
       this.audio.srcObject = e.streams[0];
     };
-    this.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-    for (const track of this.mic.getTracks()) this.pc.addTrack(track, this.mic);
+    this.mic = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
+    });
+    for (const track of this.mic.getTracks()) {
+      if (this.mode === "ptt") track.enabled = false;
+      this.pc.addTrack(track, this.mic);
+    }
 
     this.dc = this.pc.createDataChannel("oai-events");
     this.dc.onmessage = (e) => this.handle(JSON.parse(e.data));
@@ -74,6 +94,29 @@ export class RealtimeSession {
     this.cb.onState("idle");
   }
 
+  /** Push-to-talk: call on pointer down. Cancels whatever 豆豆 is saying and opens the mic. */
+  pttStart() {
+    if (this.mode !== "ptt" || this.holding) return;
+    this.holding = true;
+    if (this.responding) this.send({ type: "response.cancel" });
+    this.send({ type: "input_audio_buffer.clear" });
+    this.mic?.getAudioTracks().forEach((t) => (t.enabled = true));
+    this.cb.onState("listening");
+  }
+
+  /** Push-to-talk: call on pointer up. Closes the mic and commits the turn. */
+  pttStop() {
+    if (this.mode !== "ptt" || !this.holding) return;
+    this.holding = false;
+    // let the last ~200ms of audio reach the server before committing
+    setTimeout(() => {
+      this.mic?.getAudioTracks().forEach((t) => (t.enabled = false));
+      this.send({ type: "input_audio_buffer.commit" });
+      this.send({ type: "response.create" });
+      this.cb.onState("thinking");
+    }, 200);
+  }
+
   /** Inject a system-style notice and let the model react (used when the family decides). */
   notify(text: string) {
     this.cb.onTranscript({ role: "system", text, at: Date.now() });
@@ -91,11 +134,17 @@ export class RealtimeSession {
   private async handle(ev: { type: string } & Record<string, unknown>) {
     switch (ev.type) {
       case "input_audio_buffer.speech_started":
-        this.cb.onState("listening");
+        if (this.mode === "auto") this.cb.onState("listening");
         break;
       case "input_audio_buffer.speech_stopped":
+        if (this.mode === "auto") this.cb.onState("thinking");
+        break;
       case "response.created":
+        this.responding = true;
         this.cb.onState("thinking");
+        break;
+      case "response.done":
+        this.responding = false;
         break;
       case "output_audio_buffer.started":
         this.cb.onState("speaking");
@@ -135,9 +184,13 @@ export class RealtimeSession {
         this.send({ type: "response.create" });
         break;
       }
-      case "error":
-        this.cb.onError?.(JSON.stringify(ev.error ?? ev));
+      case "error": {
+        const err = ev.error as { code?: string; message?: string } | undefined;
+        // committing an empty buffer (tap without speaking) is harmless; don't surface it
+        if (err?.code === "input_audio_buffer_commit_empty") break;
+        this.cb.onError?.(err?.message ?? JSON.stringify(ev));
         break;
+      }
     }
   }
 
@@ -189,7 +242,11 @@ export class RealtimeSession {
           const who = p.meta?.decisions?.at(-1)?.guardian ?? "家人";
           this.cb.onPayment?.({ ...p, status: p.status, proposal_id: id });
           this.cb.onState(p.status === "executed" ? "happy" : "worried");
-          this.notify(p.status === "executed" ? `${who}已經核准了給${p.meta?.recipientName ?? p.to}的 ${p.amountUsdc} 元，錢已經付出去了。` : `${who}把給${p.meta?.recipientName ?? p.to}的 ${p.amountUsdc} 元擋下來了，錢沒有動。請安慰阿嬤。`);
+          this.notify(
+            p.status === "executed"
+              ? `${who}已經核准了給${p.meta?.recipientName ?? p.to}的 ${p.amountUsdc} 元，錢已經付出去了。`
+              : `${who}把給${p.meta?.recipientName ?? p.to}的 ${p.amountUsdc} 元擋下來了，錢沒有動。請安慰阿嬤。`,
+          );
         }
       } catch {
         /* retry next tick */

@@ -48,12 +48,6 @@
     "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/58f6805e-abdd-49a9-b18b-96e87bf02aa9.mp4",
     "file": "C:\\code\\hack-taipei\\film\\clips\\06.mp4"
   },
-  "07": {
-    "request_id": "fb304a61-85a6-44e8-bd0e-87c76a6d7644",
-    "model": "wan3.0-video-prime",
-    "status": "processing",
-    "submitted_at": "2026-09-04T06:56:33.872Z"
-  },
   "08": {
     "request_id": "10c4dd2d-ad42-4f13-857a-abed12832a43",
     "model": "wan3.0-video-prime",
@@ -85,5 +79,20 @@
     "submitted_at": "2026-09-04T06:58:07.586Z",
     "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/c462e7c3-5aa9-409a-a798-a01459774700.mp4",
     "file": "C:\\code\\hack-taipei\\film\\clips\\02.mp4"
+  },
+  "07_stuck1": {
+    "request_id": "fb304a61-85a6-44e8-bd0e-87c76a6d7644",
+    "model": "wan3.0-video-prime",
+    "status": "processing",
+    "submitted_at": "2026-09-04T06:56:33.872Z",
+    "note": "stuck in processing >16 min with no status update; resubmitted"
+  },
+  "07": {
+    "request_id": "63d84be6-e07e-46bd-abfc-186697141a03",
+    "model": "wan3.0-video-prime",
+    "status": "success",
+    "submitted_at": "2026-09-04T07:13:19.105Z",
+    "video_url": "https://storage.googleapis.com/gmi-video-assests-prod/user-assets/f9b6c87e-38cf-464b-9941-c9cc75819566/11254790-dd0b-4111-a108-faa6d0c9771c/gmi-videogen/generated/63d84be6-e07e-46bd-abfc-186697141a03.mp4",
+    "file": "C:\\code\\hack-taipei\\film\\clips\\07.mp4"
   }
 }

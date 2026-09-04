@@ -228,6 +228,14 @@ pnpm smoke        # 對已部署合約跑一次：提案 → 家人擋下 → �
 | 詐騙手法清單 | 內政部警政署 165 全民防騙網公開資訊，由本隊整理 | 政府資料開放授權 |
 | 字型 | Noto Sans TC（Google Fonts） | SIL OFL 1.1 |
 
+## 附：Track 04 科幻音樂 MV《從第一個 Prompt 到最後一個鏡頭》
+
+同隊另外參加 CSFCCA LIVE AI「02 科幻音樂 MV」。9 個鏡頭 × 15 秒，對應官方指定歌曲 2 分 14 秒，使用官方角色 LUNA、志奇與 X-01／X-02／X-03 機器人。以 GMI Cloud 的 Wan 3.0 Video Prime 生成（image-to-video，官方設定稿作第一幀），ffmpeg 串接並套上官方音樂。
+
+- 分鏡與 Prompt：`film/storyboard.json`；生成紀錄（request id、版本比較）：`film/requests.json`
+- 管線：`pnpm film dry-run | submit-one <id> | submit | poll | stitch`，創作理念 PDF：`pnpm concept`
+- 官方素材依規範僅供本賽事使用，不入庫；生成影片與 PDF 輸出於 `film/out/`（不入庫）
+
 ## 七、下一步
 
 - 家人用自己的 passkey 或錢包簽核准，不再由伺服器保管金鑰。

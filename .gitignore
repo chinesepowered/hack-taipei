@@ -16,3 +16,8 @@ film/refs/
 # generated clips and renders are large; keep storyboard + requests.json
 film/clips/
 film/out/
+
+# screen recordings and rendered videos
+*.mp4
+*.mov
+video/

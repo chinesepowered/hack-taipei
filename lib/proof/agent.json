@@ -1,0 +1,10 @@
+{
+  "name": "豆豆 Doudou",
+  "description": "阿嬤的錢包的語音守護代理人。聽阿嬤和來電者說話，依 165 反詐宣導整理的手法評估每筆付款的風險，可疑的交給家人共簽。",
+  "capabilities": ["assess_payment", "explain_risk_zh", "propose_to_guardians"],
+  "model": "0gm-1.0-35b-a3b",
+  "inference": "0G Compute Router, TEE-attested (verify_tee)",
+  "owner": "阿嬤的家人",
+  "version": "0.1.0",
+  "createdAt": "2026-09-07"
+}

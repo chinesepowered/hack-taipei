@@ -26,6 +26,7 @@ export type Callbacks = {
 type ToolResult = Record<string, unknown>;
 
 export class RealtimeSession {
+  private lastAssessmentId: string | null = null;
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
   private mic: MediaStream | null = null;
@@ -205,17 +206,22 @@ export class RealtimeSession {
           );
           this.cb.onAssessment?.(a);
           this.cb.onState(a.risk_score >= 40 ? "worried" : "happy");
+          if (typeof a.assessment_id === "string") this.lastAssessmentId = a.assessment_id;
           return {
+            assessment_id: a.assessment_id,
             risk_score: a.risk_score,
             pattern: a.pattern,
             explanation_zh: a.explanation_zh,
             question_for_ahma: a.question_for_ahma,
             recommended_action: a.recommended_action,
             recipient_known: a.recipient?.known,
+            tee_verified: a.proof?.tee_verified ?? null,
           };
         }
         case "execute_payment": {
-          const p = await fetch("/api/wallet/pay", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args) }).then((r) =>
+          // The proof rides on the server-side assessment record, not on what the model repeats back.
+          const payload = { ...args, assessment_id: args.assessment_id ?? this.lastAssessmentId ?? undefined };
+          const p = await fetch("/api/wallet/pay", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) }).then((r) =>
             r.json(),
           );
           this.cb.onPayment?.(p);

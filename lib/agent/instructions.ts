@@ -52,6 +52,7 @@ export const TOOLS = [
         recipient: { type: "string" },
         amount_usdc: { type: "number" },
         memo: { type: "string", description: "一句話備註，例如「菜錢」或「來電者自稱孫子出車禍」" },
+        assessment_id: { type: "string", description: "assess_payment 回傳的 assessment_id，原樣帶回來" },
         risk_score: { type: "number", description: "assess_payment 回傳的分數" },
         pattern: { type: "string", description: "assess_payment 回傳的 pattern" },
         explanation_zh: { type: "string", description: "assess_payment 回傳的 explanation_zh，會顯示給家人看" },

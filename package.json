@@ -15,7 +15,11 @@
     "deploy": "node --env-file=.env --import=tsx scripts/deploy.ts",
     "smoke": "node --env-file=.env --import=tsx scripts/smoke.ts",
     "film": "node --env-file=.env --import=tsx scripts/film.ts",
-    "concept": "node --import=tsx scripts/concept.ts"
+    "concept": "node --import=tsx scripts/concept.ts",
+    "verify-stamp": "node --import=tsx scripts/verify-stamp.ts",
+    "keys": "node --import=tsx scripts/keys.ts",
+    "mint-agent": "node --env-file=.env --import=tsx scripts/mint-agent-id.ts",
+    "deploy:usdc": "node --env-file=.env --import=tsx scripts/deploy-mock-usdc.ts"
   },
   "dependencies": {
     "next": "^16.3.4",

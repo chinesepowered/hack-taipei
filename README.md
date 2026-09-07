@@ -61,6 +61,33 @@
 
 ---
 
+## 0G 整合點（0G Taipei Hackathon · 2026-09-07）
+
+上週的版本，豆豆的判斷是一個中心化 API 的回傳值：家人看不到、驗不了，阿嬤的通話內容還躺在我們的伺服器上。這一版把「判斷」變成一枚可以離線驗證的章。
+
+| 什麼 | 在哪裡 | 做什麼 |
+|---|---|---|
+| **0G Compute Router** | [`lib/shield/assess.ts`](./lib/shield/assess.ts) | 詐騙防護盾改走 `https://router-api.0g.ai/v1`，模型 `0gm-1.0-35b-a3b`；每次請求帶 `verify_tee: true` 與 `X-0G-Provider-Trust-Mode`，回應的 `tee_verified` 與請求／回應雜湊一起存成 `proof` |
+| **Agent 的章 (stamp)** | [`lib/proof/stamp.ts`](./lib/proof/stamp.ts) | 一次完整判斷簽成一枚章：`{agent, agent_id_token, model, request_hash, response_hash, tee_verified, score, action, at}` 正規化後由豆豆的金鑰簽名；`verifyStamp()` 只做簽章還原，離線、免 gas |
+| **章掛在哪** | [`app/api/wallet/pay/route.ts`](./app/api/wallet/pay/route.ts) | 交給家人的提案，鏈上 `memo` 前綴 `proof:0x…`（章的 keccak256 前 8 bytes），章本體與 proof 存在提案的 metadata |
+| **見章放款** | [`app/family/page.tsx`](./app/family/page.tsx) | 家人頁面每張卡片都顯示 0G TEE 驗證狀態與章，按「離線驗證這枚章」跑 `POST /api/proof/verify` |
+| **Agentic ID (ERC-7857)** | [`scripts/mint-agent-id.ts`](./scripts/mint-agent-id.ts) · [`lib/proof/agent.json`](./lib/proof/agent.json) | 豆豆在 0G Galileo 上的身分；`AGENT_ID_TOKEN` 寫進每一枚章 |
+| **錢包搬上 0G Chain（選用）** | [`lib/chain/config.ts`](./lib/chain/config.ts) · [`contracts/MockUSDC.sol`](./contracts/MockUSDC.sol) | `CHAIN=0g-galileo` 就把 GuardedWallet 部署到 0G Galileo（16602），測試 USDC 用 `pnpm deploy:usdc` |
+| **判斷不靠模型記憶** | [`lib/proof/assessments.ts`](./lib/proof/assessments.ts) | 每次評估存在伺服器端，瀏覽器把 `assessment_id` 帶進 `execute_payment`，證明跟著伺服器的紀錄走，不跟著模型複述走 |
+
+```bash
+# 三個環境變數，防護盾就在 0G 上跑
+SHIELD_BASE_URL=https://router-api.0g.ai/v1
+SHIELD_API_KEY=sk-...            # https://pc.0g.ai
+SHIELD_MODEL=0gm-1.0-35b-a3b
+
+pnpm dev                          # 跑一次詐騙劇本，家人頁面出現「這個判斷有章」
+pnpm verify-stamp --proposal 0    # 離線驗證：把網路關掉也能跑
+pnpm test                         # 章的簽驗、竄改偵測、冒名偵測
+```
+
+**誠實說**：`tee_verified` 是 0G Router 回傳的欄位，我們原樣記錄並簽進章裡；enclave 的 attestation 要用 0G 的 dstack 驗證器才能追到底，這一版沒有做。章證明的是「豆豆這把金鑰，對這個輸入雜湊，簽下了這個分數」，以及「Router 說這次推理有 TEE 驗證」。
+
 ## 系統架構
 
 ```
@@ -73,7 +100,8 @@
        │                                         ▼
        ├──── POST /api/shield ────► ┌───────────────────────────────┐
        │                            │  詐騙防護盾 Scam Shield          │
-       │                            │  規則層 (165 手法) + gpt-5.6-luna  │
+       │                            │  規則層 + 0G Compute Router (TEE)  │
+       │                            │  → 豆豆簽成一枚章 (stamp)         │
        │                            └───────────────────────────────┘
        ├──── POST /api/wallet/pay ─►┌───────────────────────────────┐
        │                            │  GuardedWallet.sol               │
@@ -87,7 +115,7 @@
 | 層 | 技術 |
 |---|---|
 | 語音代理人 | OpenAI Realtime API（`gpt-realtime-2.1-mini`，WebRTC，function calling），自動偵測與「按住說話」兩種模式 |
-| 詐騙防護盾 | 規則引擎 + `gpt-5.6-luna` structured outputs，失敗自動退回規則層 |
+| 詐騙防護盾 | 規則引擎 + 0G Compute Router（`0gm-1.0-35b-a3b`，`verify_tee`）structured outputs，失敗自動退回規則層；每次判斷由豆豆簽成可離線驗證的章 |
 | 智慧合約 | Solidity 0.8，solc-js 編譯，viem 部署，Base Sepolia + Circle 測試 USDC，四個公開 RPC 自動備援 |
 | 前端 / API | Next.js 16、TypeScript、pnpm；豆豆為手繪 SVG，六種表情跟著代理人狀態變 |
 

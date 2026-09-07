@@ -15,9 +15,23 @@ export type ProposalMeta = {
   riskScore: number;
   createdAt: number;
   decisions?: { guardian: string; decision: "approve" | "reject"; hash: string; at: number }[];
+  /** The agent's signed stamp for the judgment behind this proposal, and the inference proof it wraps. */
+  stamp?: string;
+  stampId?: string;
+  proof?: {
+    provider: string;
+    model: string;
+    request_hash: string;
+    response_hash: string;
+    tee_verified: boolean | null;
+    trust_mode: string | null;
+    response_id: string | null;
+    at: number;
+  } | null;
+  agent?: { address: string | null; agent_id_token: string | null; agent_id_contract: string | null } | null;
 };
 
-const DIR = resolve(process.cwd(), ".data");
+const DIR = resolve(process.env.DATA_DIR ?? resolve(process.cwd(), ".data"));
 const FILE = resolve(DIR, "proposals.json");
 
 function load(): Record<string, ProposalMeta> {
@@ -30,8 +44,12 @@ function load(): Record<string, ProposalMeta> {
 }
 
 function save(data: Record<string, ProposalMeta>) {
-  mkdirSync(DIR, { recursive: true });
-  writeFileSync(FILE, JSON.stringify(data, null, 2));
+  try {
+    mkdirSync(DIR, { recursive: true });
+    writeFileSync(FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.warn("[store] not persisted:", e instanceof Error ? e.message : e);
+  }
 }
 
 export function getMeta(id: number): ProposalMeta | null {

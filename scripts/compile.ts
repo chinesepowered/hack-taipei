@@ -11,10 +11,11 @@ const solc = require("solc");
 
 const root = resolve(import.meta.dirname, "..");
 const source = readFileSync(resolve(root, "contracts/GuardedWallet.sol"), "utf8");
+const mock = readFileSync(resolve(root, "contracts/MockUSDC.sol"), "utf8");
 
 const input = {
   language: "Solidity",
-  sources: { "GuardedWallet.sol": { content: source } },
+  sources: { "GuardedWallet.sol": { content: source }, "MockUSDC.sol": { content: mock } },
   settings: {
     optimizer: { enabled: true, runs: 200 },
     outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } },
@@ -39,3 +40,8 @@ const out = {
 mkdirSync(resolve(root, "lib/chain"), { recursive: true });
 writeFileSync(resolve(root, "lib/chain/GuardedWallet.json"), JSON.stringify(out, null, 2));
 console.log(`compiled GuardedWallet: ${out.abi.length} ABI entries, ${(out.bytecode.length - 2) / 2} bytes`);
+
+const mockArtifact = output.contracts["MockUSDC.sol"].MockUSDC;
+const mockOut = { abi: mockArtifact.abi, bytecode: `0x${mockArtifact.evm.bytecode.object}` };
+writeFileSync(resolve(root, "lib/chain/MockUSDC.json"), JSON.stringify(mockOut, null, 2));
+console.log(`compiled MockUSDC: ${mockOut.abi.length} ABI entries, ${(mockOut.bytecode.length - 2) / 2} bytes`);

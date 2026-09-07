@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PATTERNS, ruleScore, runRules, type RuleHit } from "./patterns";
+import { sha256Hex, type InferenceProof } from "../proof/stamp";
 
 export const AssessInput = z.object({
   recipient: z.string().default(""),
@@ -20,7 +21,16 @@ export type Assessment = {
   recommended_action: "pay" | "ask_family" | "block";
   rule_hits: RuleHit[];
   source: "llm+rules" | "rules";
+  /** Present when the judgment came from a model call. On 0G it carries the TEE attestation flag. */
+  proof: InferenceProof | null;
 };
+
+/** 0G Compute Router: OpenAI-compatible, plus `verify_tee` in the body and a trust-mode header. */
+export function shieldProvider(baseUrl: string): InferenceProof["provider"] {
+  if (process.env.SHIELD_PROVIDER === "0g" || /0g\.ai|integratenetwork/i.test(baseUrl)) return "0g";
+  if (/openai\.com/i.test(baseUrl)) return "openai";
+  return "other";
+}
 
 const LlmOut = z.object({
   risk_score: z.number().int().min(0).max(100),
@@ -70,12 +80,15 @@ export async function assessPayment(raw: unknown): Promise<Assessment> {
     recommended_action: actionFor(base),
     rule_hits: hits,
     source: "rules",
+    proof: null,
   };
 
   const apiKey = process.env.SHIELD_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) return fallback;
   const baseUrl = (process.env.SHIELD_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
   const model = process.env.SHIELD_MODEL || "gpt-5-mini";
+  const provider = shieldProvider(baseUrl);
+  const trustMode = provider === "0g" ? process.env.SHIELD_TRUST_MODE || "verified" : null;
 
   const system = `你是「豆豆」背後的詐騙防護盾，服務台灣的長輩。根據 165 反詐騙常見手法評估這筆付款的風險。
 規則層已經先掃過關鍵字，結果附在下面，你可以調高或調低分數，但要合理。
@@ -100,26 +113,37 @@ explanation_zh 要用阿嬤聽得懂的台灣口語中文，不要用「風險�
 
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 12_000);
-    const res = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-      signal: ctrl.signal,
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        response_format: { type: "json_schema", json_schema: JSON_SCHEMA },
-      }),
+    const timer = setTimeout(() => ctrl.abort(), Number(process.env.SHIELD_TIMEOUT_MS ?? 20_000));
+    const requestBody = JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+      response_format: { type: "json_schema", json_schema: JSON_SCHEMA },
+      // 0G only: ask the router to attach the enclave attestation to the trace. Ignored by other providers.
+      ...(provider === "0g" ? { verify_tee: true } : {}),
     });
+    const headers: Record<string, string> = { "content-type": "application/json", authorization: `Bearer ${apiKey}` };
+    if (trustMode) headers["X-0G-Provider-Trust-Mode"] = trustMode;
+    const res = await fetch(`${baseUrl}/chat/completions`, { method: "POST", headers, signal: ctrl.signal, body: requestBody });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`shield model ${res.status}: ${await res.text()}`);
     const data = await res.json();
     const content: string = data.choices?.[0]?.message?.content ?? "";
     const parsed = LlmOut.parse(JSON.parse(content));
     const pattern = PATTERNS.find((p) => p.code === parsed.pattern_code);
+    const teeRaw = data.tee_verified ?? data.verification?.tee_verified ?? res.headers.get("x-0g-tee-verified");
+    const proof: InferenceProof = {
+      provider,
+      model: String(data.model ?? model),
+      request_hash: sha256Hex(requestBody),
+      response_hash: sha256Hex(content),
+      tee_verified: teeRaw === undefined || teeRaw === null ? null : teeRaw === true || teeRaw === "true",
+      trust_mode: trustMode,
+      response_id: typeof data.id === "string" ? data.id : null,
+      at: Date.now(),
+    };
     return {
       risk_score: parsed.risk_score,
       pattern: pattern?.name ?? "無",
@@ -129,6 +153,7 @@ explanation_zh 要用阿嬤聽得懂的台灣口語中文，不要用「風險�
       recommended_action: parsed.recommended_action,
       rule_hits: hits,
       source: "llm+rules",
+      proof,
     };
   } catch (err) {
     console.warn("[shield] falling back to rules:", err instanceof Error ? err.message : err);

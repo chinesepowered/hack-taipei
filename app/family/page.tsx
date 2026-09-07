@@ -29,7 +29,7 @@ type Proposal = {
 };
 type Agent = { name: string; address: string | null; agent_id_token: string | null; agent_id_contract: string | null; chain: string };
 type Data = { proposals: Proposal[]; guardians: { index: number; name: string }[]; explorer: string; wallet: string; agent?: Agent | null; error?: string };
-type Verify = { ok: boolean; reason: string; signer: string | null; id: string | null; payload: { model?: string; score?: number; tee_verified?: boolean | null } | null };
+type Verify = { ok: boolean; reason: string; signer: string | null; id: string | null; payload: { model?: string; score?: number; tee_verified?: boolean | null } | null; identity?: { checked: boolean; ok: boolean; reason: string; explorer?: string } | null };
 
 const STATUS_ZH = { pending: "等你決定", executed: "已付款", rejected: "已擋下" } as const;
 
@@ -155,7 +155,7 @@ function StampBox({ p, agent }: { p: Proposal; agent: Agent | null }) {
       const r: Verify = await fetch("/api/proof/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ stamp, expected_signer: agent?.address ?? null }),
+        body: JSON.stringify({ stamp, expected_signer: agent?.address ?? null, onchain: true }),
       }).then((r) => r.json());
       setV(r);
     } finally {
@@ -182,6 +182,20 @@ function StampBox({ p, agent }: { p: Proposal; agent: Agent | null }) {
           {v.payload && (
             <small>
               模型 {v.payload.model} · 分數 {v.payload.score} · TEE {v.payload.tee_verified === true ? "已驗證" : v.payload.tee_verified === false ? "未驗證" : "無欄位"}
+            </small>
+          )}
+          {v.identity && (
+            <small>
+              {v.identity.checked ? (v.identity.ok ? "✓ " : "✗ ") : "· "}
+              鏈上身分：{v.identity.reason}
+              {v.identity.explorer && (
+                <>
+                  {" "}
+                  <a href={v.identity.explorer} target="_blank" rel="noreferrer">
+                    看合約
+                  </a>
+                </>
+              )}
             </small>
           )}
         </div>

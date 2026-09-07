@@ -1,4 +1,5 @@
 allowBuilds:
+  blake-hash: true
   esbuild: true
   ffmpeg-static: true
 minimumReleaseAgeExclude:

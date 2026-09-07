@@ -67,26 +67,28 @@
 
 | 什麼 | 在哪裡 | 做什麼 |
 |---|---|---|
-| **0G Compute Router** | [`lib/shield/assess.ts`](./lib/shield/assess.ts) | 詐騙防護盾改走 `https://router-api.0g.ai/v1`，模型 `0gm-1.0-35b-a3b`；每次請求帶 `verify_tee: true` 與 `X-0G-Provider-Trust-Mode`，回應的 `tee_verified` 與請求／回應雜湊一起存成 `proof` |
+| **0G Compute Network（testnet，Demo 用的路徑）** | [`lib/shield/og.ts`](./lib/shield/og.ts) · [`lib/shield/assess.ts`](./lib/shield/assess.ts) | `SHIELD_PROVIDER=0g-broker`：防護盾透過 `@0gfoundation/0g-compute-ts-sdk` 用豆豆的錢包簽每一次請求，跑在 TeeML provider 上（testnet 現有 `qwen/qwen2.5-omni-7b`），回應由 `processResponse()` 驗 provider 簽章，結果就是章裡的 `tee_verified` |
+| **0G Compute Router（mainnet，可選）** | [`lib/shield/assess.ts`](./lib/shield/assess.ts) | `SHIELD_BASE_URL=https://router-api.0g.ai/v1` + `SHIELD_MODEL=0gm-1.0-35b-a3b`：每次請求帶 `verify_tee: true` 與 `X-0G-Provider-Trust-Mode`，回應的 `tee_verified` 一樣進 `proof` |
 | **Agent 的章 (stamp)** | [`lib/proof/stamp.ts`](./lib/proof/stamp.ts) | 一次完整判斷簽成一枚章：`{agent, agent_id_token, model, request_hash, response_hash, tee_verified, score, action, at}` 正規化後由豆豆的金鑰簽名；`verifyStamp()` 只做簽章還原，離線、免 gas |
 | **章掛在哪** | [`app/api/wallet/pay/route.ts`](./app/api/wallet/pay/route.ts) | 交給家人的提案，鏈上 `memo` 前綴 `proof:0x…`（章的 keccak256 前 8 bytes），章本體與 proof 存在提案的 metadata |
 | **見章放款** | [`app/family/page.tsx`](./app/family/page.tsx) | 家人頁面每張卡片都顯示 0G TEE 驗證狀態與章，按「離線驗證這枚章」跑 `POST /api/proof/verify` |
-| **Agentic ID (ERC-7857)** | [`scripts/mint-agent-id.ts`](./scripts/mint-agent-id.ts) · [`lib/proof/agent.json`](./lib/proof/agent.json) | 豆豆在 0G Galileo 上的身分；`AGENT_ID_TOKEN` 寫進每一枚章 |
-| **錢包搬上 0G Chain（選用）** | [`lib/chain/config.ts`](./lib/chain/config.ts) · [`contracts/MockUSDC.sol`](./contracts/MockUSDC.sol) | `CHAIN=0g-galileo` 就把 GuardedWallet 部署到 0G Galileo（16602），測試 USDC 用 `pnpm deploy:usdc` |
+| **Agentic ID (ERC-7857 風格)** | [`contracts/AgenticID.sol`](./contracts/AgenticID.sol) · [`lib/proof/onchain.ts`](./lib/proof/onchain.ts) · [`lib/proof/agent.json`](./lib/proof/agent.json) | 豆豆在 0G Galileo 上的身分（`mint / ownerOf / executorOf / authorizeUsage / transfer / clone`）。章裡寫 `agent_id_contract` + `agent_id_token`；`pnpm verify-stamp --onchain` 再比對簽章者是不是鏈上的 executor |
+| **錢包在 0G Chain 上** | [`lib/chain/config.ts`](./lib/chain/config.ts) · [`contracts/MockUSDC.sol`](./contracts/MockUSDC.sol) · [`scripts/og-chain-setup.mjs`](./scripts/og-chain-setup.mjs) | `CHAIN=0g-galileo`：GuardedWallet、測試 USDC、豆豆的 Agentic ID 全部在 0G Galileo（16602）。Demo 部署：錢包 `0xb1e21c761bd881115b72e7a95fefdada1ee0c374`、Agentic ID `0x8da551786450b4bbc39be98178d1f3ef06cc764e` #1 |
 | **判斷不靠模型記憶** | [`lib/proof/assessments.ts`](./lib/proof/assessments.ts) | 每次評估存在伺服器端，瀏覽器把 `assessment_id` 帶進 `execute_payment`，證明跟著伺服器的紀錄走，不跟著模型複述走 |
 
 ```bash
-# 三個環境變數，防護盾就在 0G 上跑
-SHIELD_BASE_URL=https://router-api.0g.ai/v1
-SHIELD_API_KEY=sk-...            # https://pc.0g.ai
-SHIELD_MODEL=0gm-1.0-35b-a3b
+# testnet 路徑：豆豆的錢包直接付 0G 算力，不需要 API key
+SHIELD_PROVIDER=0g-broker
+OWNER_PRIVATE_KEY=0x...           # 有 0G testnet 幣的金鑰（ledger 最少 3 0G）
+CHAIN=0g-galileo
+node --env-file=.env --import=tsx scripts/og-chain-setup.mjs   # 白名單、測試 USDC、家人 gas、compute ledger、Agentic ID 一次做完
 
 pnpm dev                          # 跑一次詐騙劇本，家人頁面出現「這個判斷有章」
-pnpm verify-stamp --proposal 0    # 離線驗證：把網路關掉也能跑
+pnpm verify-stamp --proposal 0 --onchain   # 離線驗簽章，再比對鏈上 Agentic ID 的 executor
 pnpm test                         # 章的簽驗、竄改偵測、冒名偵測
 ```
 
-**誠實說**：`tee_verified` 是 0G Router 回傳的欄位，我們原樣記錄並簽進章裡；enclave 的 attestation 要用 0G 的 dstack 驗證器才能追到底，這一版沒有做。章證明的是「豆豆這把金鑰，對這個輸入雜湊，簽下了這個分數」，以及「Router 說這次推理有 TEE 驗證」。
+**誠實說**：testnet 路徑的 `tee_verified` 來自 SDK 的 `processResponse()`，它驗的是 TeeML provider 對這次回應的簽章；enclave 本身的 attestation 要用 0G 的 dstack 驗證器才能追到底，這一版沒有做。章證明的是「豆豆這把金鑰（也就是 Agentic ID #1 的 executor），對這個輸入雜湊，簽下了這個分數」，加上「provider 對這次回應的簽章我們驗過了」。家人的兩把金鑰為了現場穩定仍由伺服器代簽。
 
 ## 系統架構
 

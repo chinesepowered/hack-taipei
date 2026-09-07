@@ -7,6 +7,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { CHAIN, CHAIN_KEY, PRESET, RPC_URLS, USDC_ADDRESS } from "../lib/chain/config";
 import artifact from "../lib/chain/GuardedWallet.json" with { type: "json" };
 import { CONTACTS } from "../lib/contacts";
+import { waitReceipt } from "../lib/chain/receipt";
 
 function need(name: string): string {
   const v = process.env[name];
@@ -36,7 +37,7 @@ async function main() {
     args: [usdc, owner.address, [g1.address, g2.address], threshold, dailyLimit],
   });
   console.log(`deploy tx ${hash}`);
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const receipt = await waitReceipt(publicClient, hash);
   const address = receipt.contractAddress!;
   console.log(`GuardedWallet deployed at ${address}`);
 
@@ -47,7 +48,7 @@ async function main() {
       functionName: "setAllowlist",
       args: [c.address, true],
     });
-    await publicClient.waitForTransactionReceipt({ hash: tx });
+    await waitReceipt(publicClient, tx);
     console.log(`allowlisted ${c.name} ${c.address}`);
   }
 

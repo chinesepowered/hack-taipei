@@ -1,6 +1,7 @@
 import { decodeEventLog, formatUnits, type Address, type Hex } from "viem";
 import { ABI, EXPLORER_URL, WALLET_ADDRESS, assertConfigured, guardianWallet, ownerWallet, publicClient } from "./client";
 import { getMeta, setMeta, type ProposalMeta } from "../store";
+import { waitReceipt } from "./receipt";
 export { resolveRecipient } from "../contacts";
 
 export const STATUS = ["pending", "executed", "rejected"] as const;
@@ -69,7 +70,7 @@ export async function payDirect(p: { to: Address; amount: bigint; memo: string }
   assertConfigured();
   const wallet = ownerWallet();
   const hash = await withRetry("pay", () => wallet.writeContract({ address: WALLET_ADDRESS, abi: ABI, functionName: "pay", args: [p.to, p.amount, p.memo] }));
-  await publicClient.waitForTransactionReceipt({ hash });
+  await waitReceipt(publicClient, hash);
   return { hash, url: txUrl(hash) };
 }
 
@@ -80,7 +81,7 @@ export async function proposePayment(p: { to: Address; amount: bigint; memo: str
   const hash = await withRetry("propose", () =>
     wallet.writeContract({ address: WALLET_ADDRESS, abi: ABI, functionName: "propose", args: [p.to, p.amount, p.memo, risk] }),
   );
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const receipt = await waitReceipt(publicClient, hash);
   let id = -1;
   for (const log of receipt.logs) {
     try {
@@ -109,7 +110,7 @@ export async function guardianDecide(p: { proposalId: number; guardianIndex: num
       args: [BigInt(p.proposalId)],
     }),
   );
-  await publicClient.waitForTransactionReceipt({ hash });
+  await waitReceipt(publicClient, hash);
   const meta = getMeta(p.proposalId);
   setMeta(p.proposalId, {
     ...(meta ?? { recipientName: "", recipientInput: "", reason: "", callerClaims: "", explanation: "", pattern: "", riskScore: 0, createdAt: Date.now() }),

@@ -12,10 +12,11 @@ const solc = require("solc");
 const root = resolve(import.meta.dirname, "..");
 const source = readFileSync(resolve(root, "contracts/GuardedWallet.sol"), "utf8");
 const mock = readFileSync(resolve(root, "contracts/MockUSDC.sol"), "utf8");
+const agentic = readFileSync(resolve(root, "contracts/AgenticID.sol"), "utf8");
 
 const input = {
   language: "Solidity",
-  sources: { "GuardedWallet.sol": { content: source }, "MockUSDC.sol": { content: mock } },
+  sources: { "GuardedWallet.sol": { content: source }, "MockUSDC.sol": { content: mock }, "AgenticID.sol": { content: agentic } },
   settings: {
     optimizer: { enabled: true, runs: 200 },
     outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } },
@@ -45,3 +46,8 @@ const mockArtifact = output.contracts["MockUSDC.sol"].MockUSDC;
 const mockOut = { abi: mockArtifact.abi, bytecode: `0x${mockArtifact.evm.bytecode.object}` };
 writeFileSync(resolve(root, "lib/chain/MockUSDC.json"), JSON.stringify(mockOut, null, 2));
 console.log(`compiled MockUSDC: ${mockOut.abi.length} ABI entries, ${(mockOut.bytecode.length - 2) / 2} bytes`);
+
+const agenticArtifact = output.contracts["AgenticID.sol"].AgenticID;
+const agenticOut = { abi: agenticArtifact.abi, bytecode: `0x${agenticArtifact.evm.bytecode.object}` };
+writeFileSync(resolve(root, "lib/chain/AgenticID.json"), JSON.stringify(agenticOut, null, 2));
+console.log(`compiled AgenticID: ${agenticOut.abi.length} ABI entries, ${(agenticOut.bytecode.length - 2) / 2} bytes`);

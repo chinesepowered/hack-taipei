@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PATTERNS, ruleScore, runRules, type RuleHit } from "./patterns";
 import { sha256Hex, type InferenceProof } from "../proof/stamp";
+import { ogChat } from "./og";
 
 export const AssessInput = z.object({
   recipient: z.string().default(""),
@@ -27,6 +28,7 @@ export type Assessment = {
 
 /** 0G Compute Router: OpenAI-compatible, plus `verify_tee` in the body and a trust-mode header. */
 export function shieldProvider(baseUrl: string): InferenceProof["provider"] {
+  if (process.env.SHIELD_PROVIDER === "0g-broker") return "0g";
   if (process.env.SHIELD_PROVIDER === "0g" || /0g\.ai|integratenetwork/i.test(baseUrl)) return "0g";
   if (/openai\.com/i.test(baseUrl)) return "openai";
   return "other";
@@ -63,6 +65,53 @@ function actionFor(score: number): Assessment["recommended_action"] {
   return "pay";
 }
 
+
+function systemPrompt() {
+  return `你是「豆豆」背後的詐騙防護盾，服務台灣的長輩。根據 165 反詐騙常見手法評估這筆付款的風險。
+規則層已經先掃過關鍵字，結果附在下面，你可以調高或調低分數，但要合理。
+判斷重點：收款人是否常用、說法是否符合已知詐騙劇本（假冒親友、假冒檢警、監管帳戶、解除分期、投資群組、催促保密）、金額是否異常。
+explanation_zh 要用阿嬤聽得懂的台灣口語中文，不要用「風險評估」這種詞，兩句以內。
+已知手法代碼：${PATTERNS.map((p) => `${p.code}=${p.name}（${p.tell}）`).join("；")}`;
+}
+
+function userPayload(input: AssessInput, hits: RuleHit[], base: number) {
+  return JSON.stringify(
+    {
+      收款人: input.recipient,
+      收款人在常用名單: input.recipient_known,
+      收款人在白名單: input.recipient_allowlisted,
+      金額_USDC: input.amount_usdc,
+      阿嬤說的理由: input.reason,
+      來電者的說法: input.caller_claims,
+      規則層命中: hits.map((h) => ({ 手法: h.name, 關鍵字: h.matched })),
+      規則層分數: base,
+    },
+    null,
+    1,
+  );
+}
+
+/** Small models sometimes wrap JSON in prose or code fences. Take the outermost {...} block. */
+function extractJson(text: string): string {
+  const a = text.indexOf("{");
+  const b = text.lastIndexOf("}");
+  return a >= 0 && b > a ? text.slice(a, b + 1) : text;
+}
+
+/** Be forgiving about what a 7B model returns: numbers as strings, unknown pattern codes, missing action. */
+function coerceOut(o: unknown, hits: RuleHit[], base: number): unknown {
+  if (!o || typeof o !== "object" || Array.isArray(o)) return o;
+  const r = { ...(o as Record<string, unknown>) };
+  const n = Number(r.risk_score);
+  r.risk_score = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : base;
+  const codes = new Set<string>([...PATTERNS.map((p) => p.code), "none"]);
+  if (typeof r.pattern_code !== "string" || !codes.has(r.pattern_code)) r.pattern_code = hits[0]?.code ?? "none";
+  if (!["pay", "ask_family", "block"].includes(String(r.recommended_action))) r.recommended_action = actionFor(r.risk_score as number);
+  if (typeof r.explanation_zh !== "string") r.explanation_zh = "";
+  if (typeof r.question_for_ahma !== "string") r.question_for_ahma = "";
+  return r;
+}
+
 export async function assessPayment(raw: unknown): Promise<Assessment> {
   const input = AssessInput.parse(raw);
   const text = `${input.reason} ${input.caller_claims} ${input.recipient}`;
@@ -83,33 +132,58 @@ export async function assessPayment(raw: unknown): Promise<Assessment> {
     proof: null,
   };
 
+  const system = systemPrompt();
+  const user = userPayload(input, hits, base);
+
+  // 0G Compute Network broker path (testnet): wallet-signed request, TEE provider, response signature verified by us.
+  if (process.env.SHIELD_PROVIDER === "0g-broker") {
+    try {
+      const messages = [
+        {
+          role: "system",
+          content:
+            system +
+            `\n只回傳一個 JSON 物件，不要加說明、不要加程式碼區塊，欄位固定如下：
+{"risk_score": <0 到 100 的整數>, "pattern_code": "<${[...PATTERNS.map((p) => p.code), "none"].join("|")}>", "explanation_zh": "<兩句以內的台灣口語中文>", "question_for_ahma": "<一句幫阿嬤查證的建議>", "recommended_action": "<pay|ask_family|block>"}`,
+        },
+        { role: "user", content: user },
+      ];
+      const r = await ogChat(messages, { timeoutMs: Number(process.env.SHIELD_TIMEOUT_MS ?? 45_000) });
+      const parsed = LlmOut.parse(coerceOut(JSON.parse(extractJson(r.content)), hits, base));
+      const pattern = PATTERNS.find((p) => p.code === parsed.pattern_code);
+      const proof: InferenceProof = {
+        provider: "0g",
+        model: r.model,
+        request_hash: sha256Hex(JSON.stringify(messages)),
+        response_hash: sha256Hex(r.content),
+        tee_verified: r.verified,
+        trust_mode: r.verifiability,
+        response_id: r.chatID,
+        at: Date.now(),
+      };
+      return {
+        risk_score: parsed.risk_score,
+        pattern: pattern?.name ?? "無",
+        pattern_code: parsed.pattern_code,
+        explanation_zh: parsed.explanation_zh,
+        question_for_ahma: parsed.question_for_ahma,
+        recommended_action: parsed.recommended_action,
+        rule_hits: hits,
+        source: "llm+rules",
+        proof,
+      };
+    } catch (err) {
+      console.warn("[shield] 0g broker failed, falling back to rules:", err instanceof Error ? err.message : err);
+      return fallback;
+    }
+  }
+
   const apiKey = process.env.SHIELD_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) return fallback;
   const baseUrl = (process.env.SHIELD_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
   const model = process.env.SHIELD_MODEL || "gpt-5-mini";
   const provider = shieldProvider(baseUrl);
   const trustMode = provider === "0g" ? process.env.SHIELD_TRUST_MODE || "verified" : null;
-
-  const system = `你是「豆豆」背後的詐騙防護盾，服務台灣的長輩。根據 165 反詐騙常見手法評估這筆付款的風險。
-規則層已經先掃過關鍵字，結果附在下面，你可以調高或調低分數，但要合理。
-判斷重點：收款人是否常用、說法是否符合已知詐騙劇本（假冒親友、假冒檢警、監管帳戶、解除分期、投資群組、催促保密）、金額是否異常。
-explanation_zh 要用阿嬤聽得懂的台灣口語中文，不要用「風險評估」這種詞，兩句以內。
-已知手法代碼：${PATTERNS.map((p) => `${p.code}=${p.name}（${p.tell}）`).join("；")}`;
-
-  const user = JSON.stringify(
-    {
-      收款人: input.recipient,
-      收款人在常用名單: input.recipient_known,
-      收款人在白名單: input.recipient_allowlisted,
-      金額_USDC: input.amount_usdc,
-      阿嬤說的理由: input.reason,
-      來電者的說法: input.caller_claims,
-      規則層命中: hits.map((h) => ({ 手法: h.name, 關鍵字: h.matched })),
-      規則層分數: base,
-    },
-    null,
-    1,
-  );
 
   try {
     const ctrl = new AbortController();

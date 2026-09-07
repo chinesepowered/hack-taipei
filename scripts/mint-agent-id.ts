@@ -9,6 +9,7 @@ import { createPublicClient, createWalletClient, decodeEventLog, http, keccak256
 import { privateKeyToAccount } from "viem/accounts";
 import { ogGalileo } from "../lib/chain/config";
 import agent from "../lib/proof/agent.json" with { type: "json" };
+import { waitReceipt } from "../lib/chain/receipt";
 
 const DEFAULT_ABI = [
   {
@@ -48,7 +49,7 @@ async function main() {
   console.log(`minting Agentic ID for ${agent.name} to ${owner.address} on 0G Galileo`);
   console.log(`metadataHash ${metadataHash}`);
   const hash = await wallet.writeContract({ address: contract, abi, functionName: "mint", args: [owner.address, uri, metadataHash] });
-  const receipt = await pub.waitForTransactionReceipt({ hash });
+  const receipt = await waitReceipt(pub, hash);
   let tokenId: string | null = null;
   for (const log of receipt.logs) {
     try {

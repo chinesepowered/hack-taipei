@@ -6,6 +6,7 @@
 import { createPublicClient, createWalletClient, formatEther, formatUnits, http, parseEther, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { CHAIN, CHAIN_KEY, PRESET, RPC_URLS, USDC_ADDRESS } from "../lib/chain/config";
+import { waitReceipt } from "../lib/chain/receipt";
 
 const rpc = RPC_URLS[0];
 const usdc = USDC_ADDRESS as Hex;
@@ -30,7 +31,7 @@ async function main() {
       continue;
     }
     const hash = await wallet.sendTransaction({ to: g.address, value: TARGET - bal });
-    await pub.waitForTransactionReceipt({ hash });
+    await waitReceipt(pub, hash);
     console.log(`funded guardian ${g.address} with ${formatEther(TARGET - bal)} ETH (${hash})`);
   }
 }

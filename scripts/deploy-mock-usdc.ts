@@ -7,6 +7,7 @@ import { createPublicClient, createWalletClient, http, parseUnits, type Hex } fr
 import { privateKeyToAccount } from "viem/accounts";
 import { CHAIN, CHAIN_KEY, RPC_URLS, USDC_ADDRESS } from "../lib/chain/config";
 import artifact from "../lib/chain/MockUSDC.json" with { type: "json" };
+import { waitReceipt } from "../lib/chain/receipt";
 
 const owner = privateKeyToAccount(process.env.OWNER_PRIVATE_KEY as Hex);
 const pub = createPublicClient({ chain: CHAIN, transport: http(RPC_URLS[0]) });
@@ -20,13 +21,13 @@ async function main() {
     const token = (process.env.NEXT_PUBLIC_USDC_ADDRESS || USDC_ADDRESS) as Hex;
     if (!token) throw new Error("NEXT_PUBLIC_USDC_ADDRESS is not set; deploy first");
     const hash = await wallet.writeContract({ address: token, abi: artifact.abi, functionName: "mint", args: [to, amount] });
-    await pub.waitForTransactionReceipt({ hash });
+    await waitReceipt(pub, hash);
     console.log(`minted ${argv[2] ?? "1000"} USDC to ${to} (${hash})`);
     return;
   }
   console.log(`[${CHAIN_KEY}] deploying MockUSDC from ${owner.address}`);
   const hash = await wallet.deployContract({ abi: artifact.abi, bytecode: artifact.bytecode as Hex, args: [] });
-  const receipt = await pub.waitForTransactionReceipt({ hash });
+  const receipt = await waitReceipt(pub, hash);
   console.log(`MockUSDC deployed at ${receipt.contractAddress}`);
   console.log(`Put this in .env:  NEXT_PUBLIC_USDC_ADDRESS=${receipt.contractAddress}`);
 }

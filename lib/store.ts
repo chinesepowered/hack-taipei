@@ -29,6 +29,10 @@ export type ProposalMeta = {
     at: number;
   } | null;
   agent?: { address: string | null; agent_id_token: string | null; agent_id_contract: string | null } | null;
+  /** Where the stamp document lives on 0G Storage (Merkle root), once uploaded. */
+  storageRoot?: string;
+  storageTx?: string | null;
+  storageError?: string;
 };
 
 const DIR = resolve(process.env.DATA_DIR ?? resolve(process.cwd(), ".data"));

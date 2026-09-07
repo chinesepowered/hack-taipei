@@ -25,6 +25,9 @@ type Proposal = {
     stampId?: string;
     proof?: { provider: string; model: string; tee_verified: boolean | null; trust_mode?: string | null; request_hash: string; response_hash: string } | null;
     agent?: { address: string | null; agent_id_token: string | null; agent_id_contract: string | null } | null;
+    storageRoot?: string;
+    storageTx?: string | null;
+    storageError?: string;
   } | null;
 };
 type Agent = { name: string; address: string | null; agent_id_token: string | null; agent_id_contract: string | null; chain: string; explorer?: string | null; agent_seal?: string | null };
@@ -184,8 +187,23 @@ function StampBox({ p, agent }: { p: Proposal; agent: Agent | null }) {
   const [v, setV] = useState<Verify | null>(null);
   const [busy, setBusy] = useState(false);
   const [show, setShow] = useState(false);
+  const [st, setSt] = useState<{ ok: boolean; text: string } | null>(null);
+  const [stBusy, setStBusy] = useState(false);
   const stamp = p.meta?.stamp;
   if (!stamp) return null;
+  async function fromStorage() {
+    if (!p.meta?.storageRoot) return;
+    setStBusy(true);
+    try {
+      const r = await fetch(`/api/storage/${p.meta.storageRoot}`).then((r) => r.json());
+      if (r.error) setSt({ ok: false, text: r.error });
+      else setSt({ ok: !!r.verification?.ok, text: r.verification?.ok ? `從 0G Storage 抓回來的章驗證通過（提案 #${r.doc?.proposal}，簽章者 ${String(r.verification.signer).slice(0, 10)}…）` : `抓回來了，但驗證失敗：${r.verification?.reason ?? "未知"}` });
+    } catch (e) {
+      setSt({ ok: false, text: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setStBusy(false);
+    }
+  }
   async function verify() {
     setBusy(true);
     try {
@@ -238,6 +256,23 @@ function StampBox({ p, agent }: { p: Proposal; agent: Agent | null }) {
         </div>
       )}
       {show && <textarea readOnly className="stamp-text" value={stamp} rows={4} onFocus={(e) => e.currentTarget.select()} />}
+      <div className="stamp-row">
+        {p.meta?.storageRoot ? (
+          <>
+            <span className="hint">
+              章存在 0G Storage · root <code>{p.meta.storageRoot.slice(0, 12)}…</code>
+            </span>
+            <button className="ghost" disabled={stBusy} onClick={fromStorage}>
+              {stBusy ? "從 0G 下載中…" : "從 0G Storage 抓回來重驗"}
+            </button>
+          </>
+        ) : p.meta?.storageError ? (
+          <span className="hint">0G Storage 上傳失敗：{p.meta.storageError.slice(0, 60)}</span>
+        ) : (
+          <span className="hint">章上傳 0G Storage 中…</span>
+        )}
+      </div>
+      {st && <div className={`verify ${st.ok ? "ok" : "bad"}`}>{st.ok ? "✓ " : "✗ "}{st.text}</div>}
     </div>
   );
 }

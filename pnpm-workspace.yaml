@@ -1,7 +1,10 @@
 allowBuilds:
   blake-hash: true
+  bufferutil: true
+  es5-ext: true
   esbuild: true
   ffmpeg-static: true
+  utf-8-validate: true
 minimumReleaseAgeExclude:
   - '@types/react-dom@19.2.7'
   - '@vitest/mocker@5.0.0'

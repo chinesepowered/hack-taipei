@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>阿嬤的錢包 × 0G — 豆豆有身分，每個判斷都有章</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0f0e0c; --panel:#1a1815; --line:#2c2924; --text:#f3ede2; --muted:#a39b8c; --amber:#f2b544; --red:#e5484d; --green:#3ecf8e; --blue:#6ea8fe; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:"Noto Sans TC","Inter",system-ui,sans-serif; overflow:hidden; }
+  section { position:absolute; inset:0; padding:6vh 7vw; display:none; flex-direction:column; justify-content:center; gap:2vh; }
+  section.active { display:flex; }
+  .kicker { font-size:1rem; letter-spacing:.12em; color:var(--amber); font-weight:600; }
+  h1 { font-size:clamp(2.6rem,7vw,6rem); line-height:1.05; margin:0; font-weight:900; }
+  h1 small { display:block; font-size:.4em; color:var(--muted); font-weight:500; margin-top:.4em; }
+  h2 { font-size:clamp(1.8rem,4vw,3.2rem); margin:0; font-weight:900; }
+  .sub { font-size:clamp(1.1rem,2vw,1.6rem); color:var(--muted); max-width:44ch; line-height:1.5; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.4vw; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1.6rem; display:flex; flex-direction:column; gap:.6rem; }
+  .card h3 { margin:0; font-size:1rem; letter-spacing:.1em; color:var(--amber); }
+  .card p { margin:0; font-size:clamp(1rem,1.6vw,1.3rem); line-height:1.5; }
+  .card.ok { border-color:var(--green); } .card.next { border-color:var(--blue); border-style:dashed; }
+  .big { font-size:clamp(1.4rem,2.6vw,2.2rem); font-weight:700; line-height:1.4; }
+  .big em { color:var(--amber); font-style:normal; }
+  .flow { display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; gap:1vw; align-items:center; }
+  .node { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1.1rem; min-height:22vh; }
+  .node b { display:block; font-size:1.1rem; margin-bottom:.4rem; } .node span { color:var(--muted); font-size:.95rem; line-height:1.5; }
+  .node.og { border-color:var(--amber); box-shadow:0 0 0 1px var(--amber) inset; }
+  .arrow { color:var(--amber); font-size:2rem; text-align:center; }
+  table { border-collapse:collapse; width:100%; font-size:clamp(1rem,1.7vw,1.35rem); }
+  td, th { text-align:left; padding:.6rem .8rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; font-size:.9em; }
+  .tag { display:inline-block; padding:.15rem .6rem; border-radius:999px; font-size:.8em; border:1px solid var(--green); color:var(--green); }
+  .tag.next { border-color:var(--blue); color:var(--blue); }
+  .foot { position:absolute; left:7vw; right:7vw; bottom:3vh; display:flex; justify-content:space-between; color:var(--muted); font-size:.9rem; }
+  .nav { position:fixed; right:2vw; bottom:2vh; color:var(--muted); font-size:.85rem; }
+  code { font-family:ui-monospace,monospace; color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="active">
+  <div class="kicker">0G TAIPEI HACKATHON · TRACK B 有身份的 AGENT · 見章放款</div>
+  <h1>阿嬤的錢包 × 0G<small>豆豆有身分了，它的每一次判斷都帶著章。</small></h1>
+  <div class="big">上週它擋住了 30 萬的詐騙。今天，家人可以<em>驗證</em>它為什麼擋。</div>
+  <div class="foot"><span>Kun · Chill Agents (T162)</span><span>github.com/chinesepowered/hack-taipei · branch 0g-proof · MIT</span></div>
+</section>
+
+<section>
+  <div class="kicker">01 · 做了什麼 / 解決什麼問題</div>
+  <h2>AI 幫長輩擋詐騙。但家人憑什麼相信 AI？</h2>
+  <div class="grid">
+    <div class="card"><h3>問題</h3><p>台灣一年詐騙財損逾 500 億。阿嬤被催促的那一刻，身邊沒有人踩煞車。AI 可以判斷，可是它的判斷是一個中心化 API 的回傳值：家人看不到、驗不了，通話內容還躺在別人的伺服器上。</p></div>
+    <div class="card ok"><h3>做了什麼</h3><p>語音守護代理人「豆豆」陪阿嬤聽電話，評估風險；錢放在鏈上守護合約，可疑付款交給兩位家人共簽。今天：豆豆有 0G Agentic ID，每次判斷在 TEE 裡完成、簽成一枚章，家人與合約見章才放款。</p></div>
+    <div class="card"><h3>為什麼是 Web3</h3><p>「拒絕」必須是阿嬤和 AI 都改不掉的規則。放在 prompt 裡可以被說服，放在合約裡不行。而信任一個 agent 的判斷，需要它有身分、有證明、可稽核。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">02 · 架構</div>
+  <h2>四個 0G 元件，各做一件事</h2>
+  <div class="flow">
+    <div class="node"><b>阿嬤的手機</b><span>瀏覽器開麥克風。豆豆（OpenAI Realtime 語音）聽阿嬤和來電者。金額由程式碼從原話判讀，不靠模型算。</span></div>
+    <div class="arrow">→</div>
+    <div class="node og"><b>0G Compute</b><span>詐騙防護盾跑在 0G Compute Network 的 TeeML provider。豆豆的錢包付算力，回應簽章由 SDK 驗證 → <code>tee_verified</code>。</span></div>
+    <div class="arrow">→</div>
+    <div class="node og"><b>0G Agentic ID</b><span>豆豆 = 官方 AgenticID <code>#384</code>（ERC-8004）。每次判斷簽成一枚章：agent、模型、輸入雜湊、輸出雜湊、TEE、分數。離線可驗。</span></div>
+    <div class="arrow">→</div>
+    <div class="node og"><b>0G Chain</b><span>GuardedWallet 在 Galileo：白名單、每日額度、2-of-2 家人共簽。提案 memo 帶 <code>proof:0x…</code>，一位家人就能擋。</span></div>
+  </div>
+  <div class="sub">0G Storage：每一枚章的 JSON 上傳到 0G Storage，rootHash 掛在提案上，任何人可下載重驗。</div>
+</section>
+
+<section>
+  <div class="kicker">03 · WHY BUILD ON 0G</div>
+  <h2>因為證明要活在 agent 之間，不能活在我們的伺服器裡</h2>
+  <table>
+    <tr><th>0G 元件</th><th>我們怎麼用</th><th>狀態</th></tr>
+    <tr><td>Compute</td><td>防護盾推理走 0G Compute Network（broker SDK，TeeML provider，回應簽章驗證）；mainnet Router + 0GM 模型一個 env 切換</td><td><span class="tag">live</span></td></tr>
+    <tr><td>Agentic ID</td><td>豆豆 = 官方 AgenticID #384（attestor 註冊、ack trust roots、mint-only）；章綁定 ID，驗證器比對 <code>ownerOf(384)</code></td><td><span class="tag">live</span></td></tr>
+    <tr><td>Chain</td><td>GuardedWallet、測試 USDC、AgenticID 對照合約全部在 Galileo；自家 <code>/tx</code> 頁直接讀 RPC 解碼事件</td><td><span class="tag">live</span></td></tr>
+    <tr><td>Storage</td><td>章的 JSON 上傳 0G Storage，rootHash 掛在提案 metadata，離線重驗</td><td><span class="tag" id="storage-tag">live</span></td></tr>
+  </table>
+  <div class="big">拒絕不是寫在提示詞裡，是寫在合約裡。<em>信任不是寫在文件裡，是寫在章裡。</em></div>
+</section>
+
+<section>
+  <div class="kicker">04 · DEMO 完成了什麼（現場）</div>
+  <h2>三步，全部真的</h2>
+  <div class="grid">
+    <div class="card ok"><h3>1 · 判斷</h3><p>詐騙電話 → 風險條衝紅 → 「推理在 0G 隔離環境完成 · TEE 已驗證」。金額「十萬」由程式碼讀成 100,000，不是模型猜的。</p></div>
+    <div class="card ok"><h3>2 · 章</h3><p>家人頁面一秒內出現卡片（送上鏈中…），區塊落地後顯示「這個判斷有章」。按「離線驗證」：簽章有效 ✓、鏈上身分 = Agentic ID #384 ✓。</p></div>
+    <div class="card ok"><h3>3 · 見章放款</h3><p>媽媽擋下 → 鏈上 <code>ProposalRejected</code>，阿嬤頁面立刻通知、收支紀錄更新。關掉 Wi-Fi 也能驗那枚章。</p></div>
+  </div>
+  <div class="sub">加分項：可驗證推理（TEE 簽章驗證）· 兩個模型協作（Realtime 語音 + 0G 上的防護盾）· agent 對人的 A2H 共簽 · 14 個自動化測試</div>
+</section>
+
+<section>
+  <div class="kicker">05 · 未來 ROADMAP</div>
+  <h2>三十天</h2>
+  <div class="grid">
+    <div class="card next"><h3>Sealed sandbox</h3><p>把豆豆搬進 0G 的 sealed sandbox，讓每次回應由 agentSeal 蓋官方的 X-Agent-Proof，家人的核准變成鏈上 reputation。</p></div>
+    <div class="card next"><h3>家人自己簽</h3><p>共簽人改用自己的錢包或 passkey；銀行可以是第三位共簽人（守護錢包產品）。</p></div>
+    <div class="card next"><h3>Mainnet</h3><p>Compute Router + 0GM 模型、Guild on 0G 申請、165 專線轉接、原生台語。</p></div>
+  </div>
+  <div class="big">今天：錢包、身分、證明、儲存，全部在 0G 上。<em>謝謝。</em></div>
+  <div class="foot"><span>github.com/chinesepowered/hack-taipei/tree/0g-proof</span><span>8004scan.io/agent/384</span></div>
+</section>
+
+</div>
+<div class="nav">← → 換頁</div>
+<script>
+  const s=[...document.querySelectorAll('section')];let i=0;
+  const go=n=>{s[i].classList.remove('active');i=(n+s.length)%s.length;s[i].classList.add('active');};
+  addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+  addEventListener('click',e=>{if(e.target.tagName!=='A')go(i+1)});
+</script>
+</body>
+</html>

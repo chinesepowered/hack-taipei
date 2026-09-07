@@ -8,6 +8,8 @@ import { toZh } from "@/lib/errors";
 import { recordPayment } from "@/lib/ledger";
 import { endInflight, startInflight } from "@/lib/inflight";
 import { reconcileAmount } from "@/lib/zhAmount";
+import { putJson } from "@/lib/storage";
+import { getMeta, setMeta } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -88,6 +90,19 @@ export async function POST(req: Request) {
     });
     } finally {
       endInflight(inflight);
+    }
+    // Put the stamp on 0G Storage in the background (about 12 s); the family page picks up the root when it lands.
+    if (stamp) {
+      const id = proposal.id;
+      putJson({ kind: "grandmas-wallet-stamp", proposal: id, stamp: stamp.stamp, stamp_id: stamp.id, payload: stamp.payload, proof: assessment?.proof ?? null })
+        .then(({ rootHash, txHash }) => {
+          const m = getMeta(id);
+          if (m) setMeta(id, { ...m, storageRoot: rootHash, storageTx: txHash });
+        })
+        .catch((e) => {
+          const m = getMeta(id);
+          if (m) setMeta(id, { ...m, storageError: e instanceof Error ? e.message.split("\n")[0] : String(e) });
+        });
     }
     return NextResponse.json({
       status: "needs_family",

@@ -30,6 +30,8 @@ export class RealtimeSession {
   private recentAhma: string[] = [];
   private recentAhmaAt: number[] = [];
   private responseActive = false;
+  private speaking = false;
+  private greetTimer: ReturnType<typeof setTimeout> | null = null;
   private responsePending = false;
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
@@ -74,7 +76,11 @@ export class RealtimeSession {
     this.dc.onmessage = (e) => this.handle(JSON.parse(e.data));
     this.dc.onopen = () => {
       this.cb.onState("listening");
-      this.requestResponse({ response: { instructions: "用一句話跟阿嬤打招呼並自我介紹。" } });
+      // Greet once, and only if 阿嬤 has not already started talking. Never introduce again after that.
+      this.greetTimer = setTimeout(() => {
+        this.greetTimer = null;
+        if (!this.holding && !this.responseActive) this.requestResponse({ response: { instructions: "只說這一句，不要多：「阿嬤你好，我是豆豆。」" } });
+      }, 1500);
       this.poll = setInterval(() => this.checkWatched(), 3000);
     };
 
@@ -113,7 +119,21 @@ export class RealtimeSession {
   pttStart() {
     if (this.mode !== "ptt" || this.holding) return;
     this.holding = true;
-    if (this.responding) this.send({ type: "response.cancel" });
+    if (this.greetTimer) {
+      clearTimeout(this.greetTimer);
+      this.greetTimer = null;
+    }
+    // Barge-in: 阿嬤 pressed the button, so 豆豆 stops mid-sentence. Cancel the response and flush the audio
+    // already queued for playback; the transcript stays in the conversation so context is kept.
+    if (this.responding || this.speaking) {
+      this.send({ type: "response.cancel" });
+      this.send({ type: "output_audio_buffer.clear" });
+      this.responding = false;
+      this.responseActive = false;
+      this.responsePending = false;
+      this.speaking = false;
+      this.cb.onTranscript({ role: "system", text: "（阿嬤插話，豆豆停下來聽）", at: Date.now() });
+    }
     this.send({ type: "input_audio_buffer.clear" });
     this.mic?.getAudioTracks().forEach((t) => (t.enabled = true));
     this.cb.onState("listening");
@@ -161,17 +181,19 @@ export class RealtimeSession {
         break;
       case "response.done":
         this.responseActive = false;
-        if (this.responsePending) {
+        if (this.responsePending && !this.holding) {
           this.responsePending = false;
           setTimeout(() => this.requestResponse(), 150);
         }
         this.responding = false;
         break;
       case "output_audio_buffer.started":
+        this.speaking = true;
         this.cb.onState("speaking");
         break;
       case "output_audio_buffer.stopped":
       case "output_audio_buffer.cleared":
+        this.speaking = false;
         this.cb.onState("listening");
         break;
       case "conversation.item.input_audio_transcription.completed": {

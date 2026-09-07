@@ -230,18 +230,6 @@ export default function AhmaPage() {
         </div>
       </div>
 
-      <Ledger
-        onChange={(e) => {
-          loadWallet();
-          setState(e.kind === "executed" ? "happy" : "worried");
-          setAction(
-            e.kind === "executed"
-              ? { kind: "executed", text: `家人核准了，${e.amount_usdc} 元已付出去`, url: e.url }
-              : { kind: "rejected", text: `家人擋下了這筆 ${e.amount_usdc} 元，錢沒有動`, url: e.url },
-          );
-        }}
-      />
-
       <section className="card" style={{ marginTop: 20 }}>
         <h2>對話</h2>
         <div className="transcript">
@@ -255,6 +243,18 @@ export default function AhmaPage() {
           <div ref={bottom} />
         </div>
       </section>
+      <Ledger
+        onChange={(e) => {
+          loadWallet();
+          setState(e.kind === "executed" ? "happy" : "worried");
+          setAction(
+            e.kind === "executed"
+              ? { kind: "executed", text: `家人核准了，${e.amount_usdc} 元已付出去`, url: e.url }
+              : { kind: "rejected", text: `家人擋下了這筆 ${e.amount_usdc} 元，錢沒有動`, url: e.url },
+          );
+        }}
+      />
+
     </main>
   );
 }

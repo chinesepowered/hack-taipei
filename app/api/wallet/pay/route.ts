@@ -52,8 +52,9 @@ export async function POST(req: Request) {
         recipientInput: String(body.recipient ?? ""),
         reason: String(body.reason ?? ""),
         callerClaims: String(body.caller_claims ?? ""),
-        explanation: String(body.explanation_zh ?? assessment?.explanation_zh ?? ""),
-        pattern: String(body.pattern ?? assessment?.pattern ?? ""),
+        // The server's own assessment is the record; the model's repetition is only a fallback.
+        explanation: String(assessment?.explanation_zh || body.explanation_zh || ""),
+        pattern: String(assessment?.pattern || body.pattern || ""),
         riskScore,
         stamp: stamp?.stamp,
         stampId: stamp?.id,

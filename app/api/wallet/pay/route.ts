@@ -4,6 +4,7 @@ import { canPayDirectly, payDirect, proposePayment } from "@/lib/chain/wallet";
 import { resolveRecipient } from "@/lib/contacts";
 import { latestAssessment, recallAssessment } from "@/lib/proof/assessments";
 import { agentIdentity, makeStamp, memoWithProof } from "@/lib/proof/stamp";
+import { toZh } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
       message: "已經通知家人，錢先不會動。",
     });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ status: "error", error: msg }, { status: 500 });
+    const z = toZh(e);
+    return NextResponse.json({ status: "error", error: z.message, detail: z.detail }, { status: 500 });
   }
 }

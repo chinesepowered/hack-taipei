@@ -54,11 +54,22 @@ export type OgResult = { content: string; model: string; provider: string; chatI
 export async function ogChat(messages: { role: string; content: string }[], opts: { timeoutMs?: number; response_format?: unknown } = {}): Promise<OgResult> {
   const r = await ogReady();
   const body = JSON.stringify({ model: r.model, messages, ...(opts.response_format ? { response_format: opts.response_format } : {}) });
-  const headers = await r.broker.inference.getRequestHeaders(r.provider, body);
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 30_000);
   try {
-    const res = await fetch(`${r.endpoint}/chat/completions`, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body, signal: ctrl.signal });
+    // The testnet provider rate-limits (10 requests/min) and sheds load with 503. One patient retry before
+    // giving up, so a single busy moment does not turn a TEE-verified judgment into a rules-only one.
+    let res: Response | null = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const headers = await r.broker.inference.getRequestHeaders(r.provider, body);
+      res = await fetch(`${r.endpoint}/chat/completions`, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body, signal: ctrl.signal });
+      if (res.ok || (res.status !== 429 && res.status !== 503) || attempt === 1) break;
+      const wait = Math.min(Number(res.headers.get("retry-after") ?? 0) * 1000 || 7_000, 15_000);
+      console.warn(`[0g] provider ${res.status}, retrying in ${wait} ms`);
+      await res.text().catch(() => "");
+      await new Promise((ok) => setTimeout(ok, wait));
+    }
+    if (!res) throw new Error("0g provider: no response");
     if (!res.ok) throw new Error(`0g provider ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const data = await res.json();
     const content: string = data.choices?.[0]?.message?.content ?? "";

@@ -19,7 +19,11 @@
     "verify-stamp": "node --import=tsx scripts/verify-stamp.ts",
     "keys": "node --import=tsx scripts/keys.ts",
     "mint-agent": "node --env-file=.env --import=tsx scripts/mint-agent-id.ts",
-    "deploy:usdc": "node --env-file=.env --import=tsx scripts/deploy-mock-usdc.ts"
+    "deploy:usdc": "node --env-file=.env --import=tsx scripts/deploy-mock-usdc.ts",
+    "demo:start": "bash scripts/demo-start.sh",
+    "demo:stop": "bash scripts/demo-stop.sh",
+    "demo:check": "node scripts/demo-check.mjs",
+    "demo:clean": "node scripts/demo-clean.mjs"
   },
   "dependencies": {
     "@0gfoundation/0g-agenticid-sdk": "^0.1.2",

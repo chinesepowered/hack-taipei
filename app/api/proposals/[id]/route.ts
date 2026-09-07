@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProposal, guardianDecide } from "@/lib/chain/wallet";
+import { toZh } from "@/lib/errors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,7 @@ export async function POST(req: Request, ctx: Ctx) {
     const proposal = await getProposal(Number(id));
     return NextResponse.json({ ...result, proposal });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    const z = toZh(e);
+    return NextResponse.json({ error: z.message, detail: z.detail }, { status: 500 });
   }
 }

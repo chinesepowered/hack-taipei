@@ -83,7 +83,7 @@ OWNER_PRIVATE_KEY=0x...           # 有 0G testnet 幣的金鑰（ledger 最少 
 CHAIN=0g-galileo
 node --env-file=.env --import=tsx scripts/og-chain-setup.mjs   # 白名單、測試 USDC、家人 gas、compute ledger、Agentic ID 一次做完
 
-pnpm dev                          # 跑一次詐騙劇本，家人頁面出現「這個判斷有章」
+pnpm demo:start && pnpm demo:check   # 正式版起在 3000、健康檢查全綠（開發用 pnpm dev 也可以）
 pnpm verify-stamp --proposal 0 --onchain   # 離線驗簽章，再比對鏈上 Agentic ID 的 executor
 pnpm test                         # 章的簽驗、竄改偵測、冒名偵測
 ```

@@ -36,6 +36,15 @@
 ## 上台前 60 秒
 
 ```bash
+pnpm demo:start     # 重啟正式版（會先把佔用 3000 的程序關掉）；加 --rebuild 重新 build
+pnpm demo:check     # 全綠才上台：server、豆豆 #384、0G 推理 TEE、錢包、家人金鑰、語音 session
+pnpm demo:clean     # 把所有 pending 提案以媽媽身分擋下，家人頁面乾淨開場
+```
+0G testnet 的 provider 限制每分鐘 10 次請求：不要連按「請豆豆判斷」，兩次之間留 6 秒。程式碼遇到 429/503 會等一次再試，再不行才退回規則層。
+
+### 舊版檢查
+
+```bash
 pnpm dev                       # 阿嬤 http://localhost:3000 · 家人 /family
 curl -s localhost:3000/api/agent | head -c 400     # 豆豆身分 + 防護盾設定，確認 base_url 是 0G
 ```

@@ -1,0 +1,22 @@
+// Pre-stage health check. Exit 0 = green. Reads only; the one write is a warm shield call (no chain tx).
+const BASE = process.env.APP_URL ?? "http://localhost:3000";
+const j = async (p, init) => { const r = await fetch(BASE + p, init); return { status: r.status, body: await r.json().catch(() => ({})) }; };
+let bad = 0;
+const ok = (cond, label, extra = "") => { console.log(`${cond ? "✓" : "✗"} ${label}${extra ? "  " + extra : ""}`); if (!cond) bad++; };
+const a = await j("/api/agent");
+ok(a.status === 200, "server up", BASE);
+ok(a.body.agent_id_token === "384", "豆豆 = 0G Agentic ID #384", `${a.body.address}`);
+ok(a.body.shield?.mode?.includes("0g"), "shield on 0G compute network", a.body.shield?.model ?? "");
+const w = await j("/api/wallet/balance");
+ok(w.status === 200 && Number(w.body.balance_usdc) >= 350, "wallet funded (≥350 USDC)", `${w.body.balance_usdc} USDC, ${w.body.remaining_today_usdc} left today`);
+ok(Number(w.body.remaining_today_usdc) >= 100, "daily limit has room", "");
+const p = await j("/api/proposals");
+const pending = (p.body.proposals ?? []).filter((x) => x.status === "pending").length;
+ok(p.status === 200, "proposals readable", `${(p.body.proposals ?? []).length} total, ${pending} pending`);
+const s = await j("/api/realtime/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ mode: "ptt" }) });
+ok(s.status === 200 && !!s.body.client_secret, "voice session (OpenAI Realtime)", s.body.model ?? s.body.error ?? "");
+const t0 = Date.now();
+const sh = await j("/api/shield", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ recipient: "阿明", amount_usdc: 20, reason: "買菜錢", caller_claims: "" }) });
+ok(sh.body.source === "llm+rules" && sh.body.proof?.tee_verified === true, "0G inference TEE-verified (warm)", `${Math.round((Date.now() - t0) / 1000)}s, score ${sh.body.risk_score}`);
+console.log(bad ? `\n${bad} problem(s)` : "\nALL GREEN");
+process.exit(bad ? 1 : 0);

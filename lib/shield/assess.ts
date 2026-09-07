@@ -71,6 +71,7 @@ function systemPrompt() {
 規則層已經先掃過關鍵字，結果附在下面，你可以調高或調低分數，但要合理。
 判斷重點：收款人是否常用、說法是否符合已知詐騙劇本（假冒親友、假冒檢警、監管帳戶、解除分期、投資群組、催促保密）、金額是否異常。
 explanation_zh 要用阿嬤聽得懂的台灣口語中文，不要用「風險評估」這種詞，兩句以內。
+只根據對話裡真的出現的內容判斷：沒有提到檢警就不要說檢察官，沒有提到保密就不要說保密。不確定的手法選 none，讓分數反映不確定。
 已知手法代碼：${PATTERNS.map((p) => `${p.code}=${p.name}（${p.tell}）`).join("；")}`;
 }
 
@@ -150,6 +151,9 @@ export async function assessPayment(raw: unknown): Promise<Assessment> {
       ];
       const r = await ogChat(messages, { timeoutMs: Number(process.env.SHIELD_TIMEOUT_MS ?? 45_000) });
       const parsed = LlmOut.parse(coerceOut(JSON.parse(extractJson(r.content)), hits, base));
+      // A small model sometimes names a pattern the words do not support. If the rules matched something,
+      // the pattern of record is the rules' strongest hit unless the model agrees with one of them.
+      if (hits.length && !hits.some((h) => h.code === parsed.pattern_code)) parsed.pattern_code = hits[0].code;
       const pattern = PATTERNS.find((p) => p.code === parsed.pattern_code);
       const proof: InferenceProof = {
         provider: "0g",

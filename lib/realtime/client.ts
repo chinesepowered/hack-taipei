@@ -28,6 +28,9 @@ type ToolResult = Record<string, unknown>;
 export class RealtimeSession {
   private lastAssessmentId: string | null = null;
   private recentAhma: string[] = [];
+  private recentAhmaAt: number[] = [];
+  private responseActive = false;
+  private responsePending = false;
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
   private mic: MediaStream | null = null;
@@ -71,7 +74,7 @@ export class RealtimeSession {
     this.dc.onmessage = (e) => this.handle(JSON.parse(e.data));
     this.dc.onopen = () => {
       this.cb.onState("listening");
-      this.send({ type: "response.create", response: { instructions: "用一句話跟阿嬤打招呼並自我介紹。" } });
+      this.requestResponse({ response: { instructions: "用一句話跟阿嬤打招呼並自我介紹。" } });
       this.poll = setInterval(() => this.checkWatched(), 3000);
     };
 
@@ -97,6 +100,16 @@ export class RealtimeSession {
   }
 
   /** Push-to-talk: call on pointer down. Cancels whatever 豆豆 is saying and opens the mic. */
+  /** The Realtime API rejects a second response.create while one is running; queue it and fire on response.done. */
+  private requestResponse(extra?: Record<string, unknown>) {
+    if (this.responseActive) {
+      this.responsePending = true;
+      return;
+    }
+    this.responseActive = true;
+    this.send({ type: "response.create", ...(extra ?? {}) });
+  }
+
   pttStart() {
     if (this.mode !== "ptt" || this.holding) return;
     this.holding = true;
@@ -114,7 +127,7 @@ export class RealtimeSession {
     setTimeout(() => {
       this.mic?.getAudioTracks().forEach((t) => (t.enabled = false));
       this.send({ type: "input_audio_buffer.commit" });
-      this.send({ type: "response.create" });
+      this.requestResponse();
       this.cb.onState("thinking");
     }, 200);
   }
@@ -126,7 +139,7 @@ export class RealtimeSession {
       type: "conversation.item.create",
       item: { type: "message", role: "user", content: [{ type: "input_text", text: `（系統通知）${text}` }] },
     });
-    this.send({ type: "response.create" });
+    this.requestResponse();
   }
 
   private send(ev: unknown) {
@@ -142,10 +155,16 @@ export class RealtimeSession {
         if (this.mode === "auto") this.cb.onState("thinking");
         break;
       case "response.created":
+        this.responseActive = true;
         this.responding = true;
         this.cb.onState("thinking");
         break;
       case "response.done":
+        this.responseActive = false;
+        if (this.responsePending) {
+          this.responsePending = false;
+          setTimeout(() => this.requestResponse(), 150);
+        }
         this.responding = false;
         break;
       case "output_audio_buffer.started":
@@ -158,8 +177,11 @@ export class RealtimeSession {
       case "conversation.item.input_audio_transcription.completed": {
         const t = String(ev.transcript ?? "").trim();
         if (t) {
-          this.recentAhma = [...this.recentAhma, t].slice(-3);
-          this.cb.onTranscript({ role: "ahma", text: t, at: Date.now() });
+          const now = Date.now();
+          const keep = this.recentAhmaAt.map((at, i) => [at, this.recentAhma[i]] as const).filter(([at]) => now - at < 45_000).slice(-1);
+          this.recentAhma = [...keep.map(([, x]) => x), t];
+          this.recentAhmaAt = [...keep.map(([at]) => at), now];
+          this.cb.onTranscript({ role: "ahma", text: t, at: now });
         }
         break;
       }
@@ -186,13 +208,17 @@ export class RealtimeSession {
         this.cb.onState("thinking");
         const out = await this.runTool(name, args);
         this.send({ type: "conversation.item.create", item: { type: "function_call_output", call_id: callId, output: JSON.stringify(out) } });
-        this.send({ type: "response.create" });
+        this.requestResponse();
         break;
       }
       case "error": {
         const err = ev.error as { code?: string; message?: string } | undefined;
         // committing an empty buffer (tap without speaking) is harmless; don't surface it
         if (err?.code === "input_audio_buffer_commit_empty") break;
+        if (err?.code === "conversation_already_has_active_response") {
+          this.responsePending = true;
+          break;
+        }
         this.cb.onError?.(err?.message ?? JSON.stringify(ev));
         break;
       }
@@ -235,6 +261,8 @@ export class RealtimeSession {
             r.json(),
           );
           this.cb.onPayment?.(p);
+          this.recentAhma = [];
+          this.recentAhmaAt = [];
           if (p.status === "needs_family" && typeof p.proposal_id === "number") this.watched.add(p.proposal_id);
           this.cb.onState(p.status === "paid" ? "happy" : "worried");
           return p;

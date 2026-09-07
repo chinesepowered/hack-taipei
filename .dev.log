@@ -1,0 +1,34 @@
+$ next dev
+▲ Next.js 16.3.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.68.150:3000
+- Environments: .env
+✓ Ready in 2.0s
+✓ Running next.config.ts took 341ms
+
+ GET /api/agent 200 in 1842ms (next.js: 1567ms, application-code: 275ms)
+ GET /api/agent 200 in 39ms (next.js: 20ms, application-code: 19ms)
+○ Compiling /api/shield ...
+Detected testnet (chain ID: 16602)
+[DEBUG] 2026-09-07T06:01:06.553Z - Fetched service info from contract: Result(11) [
+  '0xa48f01287233509FD694a22Bf840225062E67836',
+  'chatbot',
+  'https://compute-network-6.integratenetwork.work',
+  905000000000n,
+  3620000000000n,
+  1788746557n,
+  'qwen/qwen2.5-omni-7b',
+  'TeeML',
+  '{"ImageDigest":"","ImageName":"","ProviderIdentity":"aliyun","ProviderType":"centralized","TEEVerifier":"dstack","TargetSeparated":true,"TargetTeeAddress":"","VerifierURL":"https://github.com/Dstack-TEE/dstack/releases/tag/verifier-v0.5.8"}',
+  '0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF',
+  true
+]
+[DEBUG] 2026-09-07T06:01:08.848Z - [Auto-funding] Provider unsettled fee: 0.002756 0G
+[DEBUG] 2026-09-07T06:01:08.849Z - [Auto-funding] Check: unsettledFee=0.002756 0G, requiredBalance=2.002756 0G
+[DEBUG] 2026-09-07T06:01:09.434Z - Locked fund for provider 0xa48f01287233509FD694a22Bf840225062E67836: 3000000000000000000, required: 2002755725000000000
+[DEBUG] 2026-09-07T06:01:11.283Z - Chat ID: 4df48170-4638-48b1-9506-29a610a2b31c
+[DEBUG] 2026-09-07T06:01:11.285Z - signing address: 0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF
+ POST /api/shield 200 in 15.5s (next.js: 6.4s, application-code: 9.1s)
+ POST /api/wallet/pay 200 in 11.1s (next.js: 1879ms, application-code: 9.2s)
+○ Compiling /api/proof/[id] ...
+ GET /api/proof/1 200 in 7.5s (next.js: 7.4s, application-code: 41ms)

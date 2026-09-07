@@ -72,7 +72,7 @@
 | **Agent 的章 (stamp)** | [`lib/proof/stamp.ts`](./lib/proof/stamp.ts) | 一次完整判斷簽成一枚章：`{agent, agent_id_token, model, request_hash, response_hash, tee_verified, score, action, at}` 正規化後由豆豆的金鑰簽名；`verifyStamp()` 只做簽章還原，離線、免 gas |
 | **章掛在哪** | [`app/api/wallet/pay/route.ts`](./app/api/wallet/pay/route.ts) | 交給家人的提案，鏈上 `memo` 前綴 `proof:0x…`（章的 keccak256 前 8 bytes），章本體與 proof 存在提案的 metadata |
 | **見章放款** | [`app/family/page.tsx`](./app/family/page.tsx) | 家人頁面每張卡片都顯示 0G TEE 驗證狀態與章，按「離線驗證這枚章」跑 `POST /api/proof/verify` |
-| **Agentic ID (ERC-7857 風格)** | [`contracts/AgenticID.sol`](./contracts/AgenticID.sol) · [`lib/proof/onchain.ts`](./lib/proof/onchain.ts) · [`lib/proof/agent.json`](./lib/proof/agent.json) | 豆豆在 0G Galileo 上的身分（`mint / ownerOf / executorOf / authorizeUsage / transfer / clone`）。章裡寫 `agent_id_contract` + `agent_id_token`；`pnpm verify-stamp --onchain` 再比對簽章者是不是鏈上的 executor |
+| **0G Agentic ID（官方，ERC-8004 + ERC-7857）** | [`scripts/og-agentic-id-official.mjs`](./scripts/og-agentic-id-official.mjs) · [`lib/proof/onchain.ts`](./lib/proof/onchain.ts) | 用 `@0gfoundation/0g-agenticid-sdk` 走 attestor `agenticid.0g.ai`：`ack()` 三個 trust root、`deposit()`、mint-only `deploy()`。豆豆 = **agent #384**（[8004scan](https://8004scan.io/agent/384)，合約 `0x3449…5648`，agentSeal `0x535d…6477`）。章裡寫 `agent_id_contract` + `agent_id_token`；`pnpm verify-stamp --onchain` 讀 `ownerOf(384)` 比對簽章者。我們先自己寫的 ERC-7857 形狀合約（[`contracts/AgenticID.sol`](./contracts/AgenticID.sol)，`0x8da5…764e` #1）保留作對照 |
 | **錢包在 0G Chain 上** | [`lib/chain/config.ts`](./lib/chain/config.ts) · [`contracts/MockUSDC.sol`](./contracts/MockUSDC.sol) · [`scripts/og-chain-setup.mjs`](./scripts/og-chain-setup.mjs) | `CHAIN=0g-galileo`：GuardedWallet、測試 USDC、豆豆的 Agentic ID 全部在 0G Galileo（16602）。Demo 部署：錢包 `0xb1e21c761bd881115b72e7a95fefdada1ee0c374`、Agentic ID `0x8da551786450b4bbc39be98178d1f3ef06cc764e` #1 |
 | **判斷不靠模型記憶** | [`lib/proof/assessments.ts`](./lib/proof/assessments.ts) | 每次評估存在伺服器端，瀏覽器把 `assessment_id` 帶進 `execute_payment`，證明跟著伺服器的紀錄走，不跟著模型複述走 |
 
@@ -88,7 +88,7 @@ pnpm verify-stamp --proposal 0 --onchain   # 離線驗簽章，再比對鏈上 A
 pnpm test                         # 章的簽驗、竄改偵測、冒名偵測
 ```
 
-**誠實說**：testnet 路徑的 `tee_verified` 來自 SDK 的 `processResponse()`，它驗的是 TeeML provider 對這次回應的簽章；enclave 本身的 attestation 要用 0G 的 dstack 驗證器才能追到底，這一版沒有做。章證明的是「豆豆這把金鑰（也就是 Agentic ID #1 的 executor），對這個輸入雜湊，簽下了這個分數」，加上「provider 對這次回應的簽章我們驗過了」。家人的兩把金鑰為了現場穩定仍由伺服器代簽。
+**誠實說**：testnet 路徑的 `tee_verified` 來自 SDK 的 `processResponse()`，它驗的是 TeeML provider 對這次回應的簽章；enclave 本身的 attestation 要用 0G 的 dstack 驗證器才能追到底，這一版沒有做。0G 官方的 `X-Agent-Proof` 要由 sealed sandbox 裡的 proxy 用 agentSeal 金鑰蓋章，豆豆今天是 mint-only（沒進 sandbox），所以章是 owner 金鑰簽的、綁定 agent #384；把豆豆搬進 sealed sandbox 是下一步。章證明的是「豆豆這把金鑰（也就是 Agentic ID #1 的 executor），對這個輸入雜湊，簽下了這個分數」，加上「provider 對這次回應的簽章我們驗過了」。家人的兩把金鑰為了現場穩定仍由伺服器代簽。
 
 ## 系統架構
 

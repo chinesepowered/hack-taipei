@@ -12,7 +12,7 @@
 **Link（0:35–2:10，現場操作）**
 > 今天防護盾跑在 0G Compute Network 上：豆豆用自己的錢包付算力，模型在 TeeML provider 的隔離環境裡跑，回應帶 provider 簽章，我們自己驗。
 > *（阿嬤頁面：跑詐騙劇本，風險條衝紅，風險條下面出現「推理在 0G 隔離環境完成 · TEE 已驗證」）*
-> 豆豆在 0G Galileo 上有身分，Agentic ID #1，合約 0x8da5。這次判斷，它簽成一枚章：哪個 agent、哪個模型、輸入的雜湊、輸出的雜湊、TEE 有沒有驗過、分數。章的指紋寫進鏈上提案的 memo。
+> 豆豆在 0G 官方的 Agentic ID 上有身分：agent #384，ERC-8004，8004scan 查得到。這次判斷，它簽成一枚章：哪個 agent、哪個模型、輸入的雜湊、輸出的雜湊、TEE 有沒有驗過、分數。章的指紋寫進鏈上提案的 memo。
 > *（家人頁面：提案卡片顯示「這個判斷有章」，按「離線驗證這枚章」→ ✓ 簽章有效）*
 > 現在把 Wi-Fi 關掉。
 > *（終端機：`pnpm verify-stamp --proposal 0` → VALID；開網路加 `--onchain` → 簽章者就是 Agentic ID #1 的 executor）*
@@ -23,12 +23,12 @@
 > 我們用兩天做出的東西，今天用三個環境變數搬到 0G 上，再加一枚章。全部開源 MIT。
 
 **收尾（2:40–3:00，對 JT）**
-> 下一步三十天：換成 0G 官方的 ERC-7857 合約與 oracle；家人改用自己的錢包簽；mainnet Router 上用 0GM 模型；申請 Guild on 0G。錢包、身分、證明今天已經全部在 0G 上了。我們想把「見章放款」做成任何銀行都能接的守護錢包。謝謝。
+> 下一步三十天：把豆豆搬進 0G 的 sealed sandbox，讓每次回應由 agentSeal 蓋官方的 X-Agent-Proof，家人的核准變成鏈上 reputation；家人改用自己的錢包簽；mainnet Router 上用 0GM。錢包、身分（ERC-8004 #384）、證明今天已經全部在 0G 上了。我們想把「見章放款」做成任何銀行都能接的守護錢包。謝謝。
 
 ## 評審會問的
 
 - **TEE 的證明你們驗到哪一層？** 誠實答：SDK 的 `processResponse()` 驗 TeeML provider 對回應的簽章，這個結果簽進章裡；enclave attestation 要用 0G 的 dstack 驗證器追到底，這一版沒做。章證明的是「豆豆這把金鑰對這個輸入雜湊簽下這個分數」加上「provider 簽章我們驗過」。
-- **章跟 Agentic ID 怎麼綁？** 章裡有 `agent_id_contract` 與 `agent_id_token`；`--onchain` 會讀合約的 `executorOf(tokenId)` 比對簽章者。合約是我們今天照 ERC-7857 的形狀寫的 demo 版（mint / ownerOf / executorOf / authorizeUsage / transfer / clone），沒有 oracle。
+- **章跟 Agentic ID 怎麼綁？** 章裡有 `agent_id_contract` 與 `agent_id_token`（官方合約 0x3449…5648，agent #384）；`--onchain` 讀 `ownerOf(384)` 比對簽章者。豆豆是用官方 SDK 走 attestor 註冊的（ack 三個 trust root、deposit、mint-only deploy），agentSeal 是 0x535d…6477。官方的 X-Agent-Proof 要豆豆跑在 sealed sandbox 裡才會由 proxy 蓋章，那是下一步；今天的章由 owner 金鑰簽，綁定 #384。
 - **為什麼不把整段對話上鏈？** 隱私。鏈上只有雜湊、分數與章的指紋。通話內容在 TEE 裡處理，`private` 模式連 provider 都讀不到 prompt。
 - **家人的簽章在哪裡？** Demo 為了穩定放在伺服器端代簽，README 有揭露；正式版換成家人自己的 passkey。這跟今天的主題無關，先講清楚。
 - **模型換掉會怎樣？** 章裡記 `model`；換模型就是不同的章，驗證器一眼看得出來。

@@ -27,7 +27,7 @@ type Proposal = {
     agent?: { address: string | null; agent_id_token: string | null; agent_id_contract: string | null } | null;
   } | null;
 };
-type Agent = { name: string; address: string | null; agent_id_token: string | null; agent_id_contract: string | null; chain: string };
+type Agent = { name: string; address: string | null; agent_id_token: string | null; agent_id_contract: string | null; chain: string; explorer?: string | null; agent_seal?: string | null };
 type Data = { proposals: Proposal[]; guardians: { index: number; name: string }[]; explorer: string; wallet: string; agent?: Agent | null; error?: string };
 type Verify = { ok: boolean; reason: string; signer: string | null; id: string | null; payload: { model?: string; score?: number; tee_verified?: boolean | null } | null; identity?: { checked: boolean; ok: boolean; reason: string; explorer?: string } | null };
 
@@ -111,8 +111,16 @@ export default function FamilyPage() {
             <b>{data.agent.name} 的身分</b>
             {data.agent.agent_id_token ? (
               <span>
-                Agentic ID #{data.agent.agent_id_token}
+                0G Agentic ID #{data.agent.agent_id_token} (ERC-8004)
                 {data.agent.agent_id_contract && <> · {data.agent.agent_id_contract.slice(0, 8)}…</>} · {data.agent.chain}
+                {data.agent.explorer && (
+                  <>
+                    {" "}
+                    <a href={data.agent.explorer} target="_blank" rel="noreferrer">
+                      8004scan
+                    </a>
+                  </>
+                )}
               </span>
             ) : (
               <span>簽章地址 {data.agent.address ? `${data.agent.address.slice(0, 8)}…${data.agent.address.slice(-4)}` : "未設定"}</span>

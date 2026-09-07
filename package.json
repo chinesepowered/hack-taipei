@@ -22,6 +22,7 @@
     "deploy:usdc": "node --env-file=.env --import=tsx scripts/deploy-mock-usdc.ts"
   },
   "dependencies": {
+    "@0gfoundation/0g-agenticid-sdk": "^0.1.2",
     "@0gfoundation/0g-compute-ts-sdk": "^0.9.0",
     "ethers": "^6.17.0",
     "next": "^16.3.4",

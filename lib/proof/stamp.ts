@@ -71,7 +71,9 @@ export function agentIdentity() {
     address,
     agent_id_token: process.env.AGENT_ID_TOKEN || null,
     agent_id_contract: process.env.AGENT_ID_CONTRACT || null,
+    agent_seal: process.env.AGENT_SEAL || null,
     chain: process.env.AGENT_ID_CHAIN ?? "0G Galileo testnet (16602)",
+    explorer: process.env.AGENT_ID_TOKEN ? `https://8004scan.io/agent/${process.env.AGENT_ID_TOKEN}` : null,
   };
 }
 

@@ -63,8 +63,9 @@ export function lastSpokenAmount(text: string): number | null {
 }
 
 /** Pick the amount of record: the spoken numeral wins when it clearly disagrees with what the model passed. */
-export function reconcileAmount(modelAmount: number, spoken: string): { amount: number; note: string | null; corrected: boolean } {
-  const heard = lastSpokenAmount(spoken);
+export function reconcileAmount(modelAmount: number, spoken: string, alsoFrom: string[] = []): { amount: number; note: string | null; corrected: boolean } {
+  let heard = lastSpokenAmount(spoken);
+  if (heard === null) for (const t of alsoFrom) { heard = lastSpokenAmount(t ?? ""); if (heard !== null) { spoken = t; break; } }
   if (heard === null) return { amount: modelAmount, note: null, corrected: false };
   const disagree = !(modelAmount > 0) || Math.abs(heard - modelAmount) / Math.max(heard, modelAmount) > 0.2;
   if (!disagree) return { amount: modelAmount, note: null, corrected: false };

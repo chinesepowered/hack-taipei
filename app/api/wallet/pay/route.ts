@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     // Amount of record: what 阿嬤 actually said beats what the model typed; the assessed amount beats a bare model number.
     const spoken = String(body.spoken ?? assessment?.spoken ?? "");
     let amountUsdc = Number(body.amount_usdc ?? 0);
-    const rec = reconcileAmount(amountUsdc, spoken);
+    const rec = reconcileAmount(amountUsdc, spoken, [String(body.reason ?? ""), String(body.caller_claims ?? ""), String(body.memo ?? "")]);
     if (rec.corrected) amountUsdc = rec.amount;
     else if (assessment?.amount_usdc && amountUsdc > 0 && Math.abs(assessment.amount_usdc - amountUsdc) / Math.max(assessment.amount_usdc, amountUsdc) > 0.2) amountUsdc = assessment.amount_usdc;
     if (!(amountUsdc > 0)) return NextResponse.json({ status: "error", error: "金額必須大於 0" }, { status: 400 });

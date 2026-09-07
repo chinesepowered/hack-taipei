@@ -1,11 +1,12 @@
 ▲ Next.js 16.3.4
 - Local:         http://localhost:3000
 - Network:       http://192.168.68.150:3000
-✓ Ready in 452ms
-✓ Running next.config.ts took 103ms
-[shield] amount corrected from 0 to 100000 (spoken: 我收到一个打过来的电话说他要十万块钱,帮我转给他。)
+✓ Ready in 503ms
+✓ Running next.config.ts took 102ms
 Detected testnet (chain ID: 16602)
-Starting upload for file of size: 1704 bytes
+[shield] amount corrected from 0 to 500 (spoken: 好,我转钱给我孙子。 等等等等,我是不是说他需要五百USDC,快帮我转一下,他说他急用)
+[shield] amount corrected from 0 to 500 (spoken: )
+Starting upload for file of size: 1702 bytes
 Upload options: {
   tags: '0x',
   submitter: '',
@@ -20,13 +21,13 @@ Upload options: {
   onProgress: undefined,
   encryption: undefined
 }
-(node:72289) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(node:73220) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 First selected node status : {
   connectedPeers: 2,
-  logSyncHeight: 53547036,
-  logSyncBlock: '0xa273ca3806ade52386a46ae24da1133dd91496d3b874e247675dae34f5016c55',
-  nextTxSeq: 149664,
+  logSyncHeight: 53549292,
+  logSyncBlock: '0x91c5aca07a497a5391e1a5ddcb0dbc4a01a28d5aa97e6c3c91dbe4375842deff',
+  nextTxSeq: 149674,
   networkIdentity: {
     chainId: 16602,
     flowAddress: '0x22e03a6a89b950f1c82ec5e74f8eca321a105296',
@@ -34,19 +35,17 @@ First selected node status : {
   }
 }
 Selected nodes: [
-  td { url: 'http://34.83.53.209:5678', timeout: 30000, retry: 3 },
+  td { url: 'http://34.19.125.196:5678', timeout: 30000, retry: 3 },
   td { url: 'http://34.169.28.106:5678', timeout: 30000, retry: 3 }
 ]
 Using splitable upload (handles both single and fragment cases)
-File details - size: 1704, numSegments: 1, numChunks: 7
-Data prepared to upload root=0x464a231bc6f58eb6af6c62a45088099c73f52eadb7fe55b6a47dd9a0671b787c size=1704 numSegments=1 numChunks=7
+File details - size: 1702, numSegments: 1, numChunks: 7
+Data prepared to upload root=0xb6e821098d4359ad8ae4c65e54f656de589ed8864f19937eeb0ce0b3954f97a5 size=1702 numSegments=1 numChunks=7
 Attempting to find existing file info by root hash...
 Submitting transaction with storage fee: 215135514734n
-Transaction submitted, hash: 0x6e29d64aedd06adb1b188f14f1742fcf737f7d4b6e59a4fc32608f8f07125dd4
+Transaction submitted, hash: 0x4dbde42d6f26667d750c68612022ebf7cea64e23800cfc41dc3f0ba1e6fd4fb9
 Wait for log entry on storage node
-Waiting for storage node to sync (height=53547048)...
-Waiting for storage node to sync (height=53547048)...
-Waiting for storage node to sync (height=53547048)...
+Waiting for storage node to sync (height=53549292)...
 Tasks created: [
   [
     {
@@ -54,7 +53,7 @@ Tasks created: [
       taskSize: 1,
       segIndex: 0,
       numShard: 2,
-      txSeq: 149664
+      txSeq: 149674
     }
   ]
 ]
@@ -62,13 +61,3 @@ Processing tasks in parallel with  1  tasks...
 All tasks processed
 Wait for log entry on storage node
 Single file upload completed - returning single result
-Starting download to: /var/folders/sh/xsx63bn537l047gk52z_gxg40000gn/T/og-get-C1DB8n/doc.json, proof: true
-Downloading single file with root hash: 0x464a231bc6f58eb6af6c62a45088099c73f52eadb7fe55b6a47dd9a0671b787c
-Getting file locations for root hash: 0x464a231bc6f58eb6af6c62a45088099c73f52eadb7fe55b6a47dd9a0671b787c
-Found 4 locations for 0x464a231bc6f58eb6af6c62a45088099c73f52eadb7fe55b6a47dd9a0671b787c: [
-  'http://34.102.76.235:5678',
-  'http://34.169.28.106:5678',
-  'http://34.133.200.179:5678',
-  'http://34.83.53.209:5678'
-]
-Selected 2 of 4 nodes for 0x464a231bc6f58eb6af6c62a45088099c73f52eadb7fe55b6a47dd9a0671b787c

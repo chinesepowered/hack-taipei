@@ -206,6 +206,9 @@ export class RealtimeSession {
           return await fetch("/api/wallet/balance").then((r) => r.json());
         case "assess_payment": {
           // The transcript travels with the call: the server parses the spoken amount itself (never the model's arithmetic).
+          // The model can act before the transcription event lands, so give the latest 阿嬤 line up to 2.5 s to arrive.
+          const before = this.recentAhma.length;
+          for (let i = 0; i < 10 && this.recentAhma.length === before && !/[0-9零一二兩两三四五六七八九十百千萬万]/.test(this.recentAhma.at(-1) ?? ""); i++) await new Promise((r) => setTimeout(r, 250));
           const a = await fetch("/api/shield", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...args, spoken: this.recentAhma.join(" ") }) }).then((r) =>
             r.json(),
           );

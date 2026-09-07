@@ -37,7 +37,7 @@ async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 5, d
     } catch (e) {
       last = e;
       const msg = e instanceof Error ? e.message : String(e);
-      const retryable = /revert|execution reverted|estimateGas|out of bounds|panic|nonce too low|replacement/i.test(msg);
+      const retryable = !/reverted with the following reason|custom error|AlreadyDecided|AlreadyApproved|NotGuardian|GuardiansRequired|TransferFailed|NotOwner/i.test(msg) && /estimateGas|out of bounds|nonce too low|replacement|receipt .* not found|timeout/i.test(msg);
       if (!retryable || i === attempts - 1) break;
       console.warn(`[chain] ${label} attempt ${i + 1} failed, retrying: ${msg.split("\n")[0]}`);
       await new Promise((r) => setTimeout(r, delayMs * (i + 1)));

@@ -7,6 +7,7 @@ import { agentIdentity, makeStamp, memoWithProof } from "@/lib/proof/stamp";
 import { toZh } from "@/lib/errors";
 import { recordPayment } from "@/lib/ledger";
 import { endInflight, startInflight } from "@/lib/inflight";
+import { reconcileAmount } from "@/lib/zhAmount";
 
 export const runtime = "nodejs";
 
@@ -20,12 +21,16 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const recipient = resolveRecipient(String(body.recipient ?? ""));
-    const amountUsdc = Number(body.amount_usdc ?? 0);
-    if (!(amountUsdc > 0)) return NextResponse.json({ status: "error", error: "金額必須大於 0" }, { status: 400 });
-    const amount = parseUnits(amountUsdc.toFixed(6), 6);
-
     // The judgment of record is the server's own copy, not what the model repeats back.
     const assessment = recallAssessment(body.assessment_id) ?? latestAssessment();
+    // Amount of record: what 阿嬤 actually said beats what the model typed; the assessed amount beats a bare model number.
+    const spoken = String(body.spoken ?? assessment?.spoken ?? "");
+    let amountUsdc = Number(body.amount_usdc ?? 0);
+    const rec = reconcileAmount(amountUsdc, spoken);
+    if (rec.corrected) amountUsdc = rec.amount;
+    else if (assessment?.amount_usdc && amountUsdc > 0 && Math.abs(assessment.amount_usdc - amountUsdc) / Math.max(assessment.amount_usdc, amountUsdc) > 0.2) amountUsdc = assessment.amount_usdc;
+    if (!(amountUsdc > 0)) return NextResponse.json({ status: "error", error: "金額必須大於 0" }, { status: 400 });
+    const amount = parseUnits(amountUsdc.toFixed(6), 6);
     const riskScore = Math.max(Number(body.risk_score ?? 100), assessment?.risk_score ?? 0);
     const rawMemo = String(body.memo ?? "").slice(0, 120);
 

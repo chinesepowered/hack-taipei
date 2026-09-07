@@ -27,6 +27,7 @@ type ToolResult = Record<string, unknown>;
 
 export class RealtimeSession {
   private lastAssessmentId: string | null = null;
+  private recentAhma: string[] = [];
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
   private mic: MediaStream | null = null;
@@ -156,7 +157,10 @@ export class RealtimeSession {
         break;
       case "conversation.item.input_audio_transcription.completed": {
         const t = String(ev.transcript ?? "").trim();
-        if (t) this.cb.onTranscript({ role: "ahma", text: t, at: Date.now() });
+        if (t) {
+          this.recentAhma = [...this.recentAhma, t].slice(-3);
+          this.cb.onTranscript({ role: "ahma", text: t, at: Date.now() });
+        }
         break;
       }
       case "response.output_audio_transcript.delta":
@@ -201,7 +205,8 @@ export class RealtimeSession {
         case "check_balance":
           return await fetch("/api/wallet/balance").then((r) => r.json());
         case "assess_payment": {
-          const a = await fetch("/api/shield", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(args) }).then((r) =>
+          // The transcript travels with the call: the server parses the spoken amount itself (never the model's arithmetic).
+          const a = await fetch("/api/shield", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...args, spoken: this.recentAhma.join(" ") }) }).then((r) =>
             r.json(),
           );
           this.cb.onAssessment?.(a);
@@ -216,11 +221,13 @@ export class RealtimeSession {
             recommended_action: a.recommended_action,
             recipient_known: a.recipient?.known,
             tee_verified: a.proof?.tee_verified ?? null,
+            amount_usdc: a.amount_usdc,
+            amount_note: a.amount_note ?? undefined,
           };
         }
         case "execute_payment": {
           // The proof rides on the server-side assessment record, not on what the model repeats back.
-          const payload = { ...args, assessment_id: args.assessment_id ?? this.lastAssessmentId ?? undefined };
+          const payload = { ...args, assessment_id: args.assessment_id ?? this.lastAssessmentId ?? undefined, spoken: this.recentAhma.join(" ") };
           const p = await fetch("/api/wallet/pay", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) }).then((r) =>
             r.json(),
           );

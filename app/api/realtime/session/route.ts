@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         tool_choice: "auto",
         audio: {
           input: {
-            transcription: { model: "gpt-4o-mini-transcribe", language: "zh" },
+            transcription: { model: "gpt-4o-mini-transcribe", language: "zh", prompt: "台灣繁體中文對話。金額用中文數字，例如十萬、三十萬、兩萬五。" },
             noise_reduction: { type: "far_field" },
             turn_detection,
           },

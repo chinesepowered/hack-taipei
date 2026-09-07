@@ -1,6 +1,7 @@
 ▲ Next.js 16.3.4
 - Local:         http://localhost:3000
 - Network:       http://192.168.68.150:3000
-✓ Ready in 471ms
-✓ Running next.config.ts took 109ms
+✓ Ready in 925ms
+✓ Running next.config.ts took 151ms
+[shield] amount corrected from 20000 to 100000 (spoken: 我收到一个打过来的电话说他要十万块钱,帮我转给他。)
 Detected testnet (chain ID: 16602)

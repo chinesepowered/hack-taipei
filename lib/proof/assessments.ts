@@ -12,7 +12,7 @@ const DIR = resolve(process.env.DATA_DIR ?? resolve(process.cwd(), ".data"));
 const FILE = resolve(DIR, "assessments.json");
 const KEEP = 200;
 
-type Stored = Assessment & { id: string; at: number };
+type Stored = Assessment & { id: string; at: number; amount_usdc?: number; spoken?: string };
 
 function load(): Stored[] {
   try {

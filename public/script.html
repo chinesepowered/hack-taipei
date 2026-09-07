@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0e0c">
+<title>阿嬤的錢包 × 0G · 台詞</title>
+<style>
+  :root { --bg:#0f0e0c; --panel:#1a1815; --line:#2c2924; --text:#f3ede2; --muted:#a39b8c; --amber:#f2b544; --red:#e5484d; --green:#3ecf8e; --blue:#6ea8fe; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--text); font-family:"Noto Sans TC",-apple-system,system-ui,sans-serif; font-size:19px; line-height:1.55; -webkit-text-size-adjust:100%; }
+  header { position:sticky; top:0; z-index:5; background:rgba(15,14,12,.96); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  #clock { font-variant-numeric:tabular-nums; font-size:34px; font-weight:800; letter-spacing:.02em; }
+  #clock.warn { color:var(--amber); } #clock.over { color:var(--red); }
+  header button { font:inherit; font-size:16px; padding:10px 14px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--text); }
+  header button.go { background:var(--green); color:#0f0e0c; border-color:transparent; font-weight:800; }
+  main { padding:12px 14px 60vh; }
+  section { border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin:12px 0; background:var(--panel); }
+  section.now { border-color:var(--amber); box-shadow:0 0 0 1px var(--amber) inset; }
+  h2 { margin:0 0 6px; font-size:15px; letter-spacing:.1em; color:var(--amber); display:flex; justify-content:space-between; }
+  h2 span { color:var(--muted); letter-spacing:0; }
+  p { margin:8px 0; }
+  .say { font-size:21px; font-weight:600; }
+  .cue { color:var(--blue); font-size:16px; }
+  .cue::before { content:"▶ "; }
+  .cut { color:var(--muted); font-size:16px; border-top:1px dashed var(--line); margin-top:10px; padding-top:8px; }
+  .qa p { margin:6px 0; } .qa b { color:var(--amber); }
+  .fail { border-color:var(--red); }
+  small.hint { display:block; color:var(--muted); font-size:14px; margin-top:6px; }
+</style>
+</head>
+<body>
+<header>
+  <div id="clock">0:00</div>
+  <div>
+    <button id="start" class="go">開始計時</button>
+    <button id="reset">歸零</button>
+  </div>
+</header>
+<main>
+
+<section data-t="0">
+  <h2>做了什麼 <span>0:00 → 0:30 · slide 1</span></h2>
+  <p class="say">阿嬤的錢包。AI 守護代理人「豆豆」陪長輩聽電話、判斷是不是詐騙，錢放在鏈上合約，可疑的付款要兩位家人共簽。上週在 BUILDMODE，它擋住了三十萬。</p>
+  <p class="say">今天豆豆有了 0G 的身分。它的每一次判斷，都在 TEE 裡完成、簽成一枚章。家人和合約，見章才放款。</p>
+</section>
+
+<section data-t="30">
+  <h2>解決什麼問題 <span>0:30 → 1:00 · slide 2</span></h2>
+  <p class="say">台灣一年詐騙財損逾五百億，長輩被催促的那一刻，身邊沒有人踩煞車。AI 可以判斷。但「家人憑什麼相信 AI」沒有答案：那是一個中心化 API 的回傳值，看不到、驗不了，通話內容還躺在別人的伺服器上。</p>
+</section>
+
+<section data-t="60">
+  <h2>架構 <span>1:00 → 1:40 · slide 3</span></h2>
+  <p class="cue">指四個框，由左到右</p>
+  <p class="say">四個 0G 元件，各做一件事。</p>
+  <p class="say">推理：防護盾跑在 0G Compute Network 的 TeeML provider，豆豆自己的錢包付算力，回應的簽章由 SDK 驗證。</p>
+  <p class="say">身分：豆豆是官方 Agentic ID 三八四號。每次判斷簽成一枚章：模型、輸入輸出雜湊、TEE、分數。</p>
+  <p class="say">儲存：章的原文上 0G Storage，rootHash 掛在提案。</p>
+  <p class="say">錢：守護錢包在 0G Chain，提案的 memo 帶著 proof。</p>
+  <p class="say">還有一條原則：金額不靠模型算，程式碼從阿嬤原話判讀。十萬就是十萬。</p>
+</section>
+
+<section data-t="100">
+  <h2>Why 0G <span>1:40 → 2:10 · slide 4</span></h2>
+  <p class="cue">讓表格停在畫面上</p>
+  <p class="say">因為證明要活在 agent 之間，不能活在我們的伺服器裡。Agent 互相調用、中間沒有人在看，「我信你」就不是安全模型。0G 給的是身分、證明、可稽核。</p>
+  <p class="say">拒絕寫在合約裡。信任寫在章裡。</p>
+</section>
+
+<section data-t="130">
+  <h2>Demo · Beat 1 <span>2:10 → 2:40 · 切到瀏覽器</span></h2>
+  <p class="cue">阿嬤頁左、家人頁右。按住藍色按鈕：</p>
+  <p class="say">「豆豆，幫我付二十元給賣菜的阿明。」</p>
+  <p class="cue">等「已付」出現，再說：</p>
+  <p class="say">常用的人、額度內，直接付。看鏈上紀錄。</p>
+  <p class="cue">點「看鏈上紀錄」，秀 PaymentExecuted，關掉</p>
+</section>
+
+<section data-t="160">
+  <h2>Demo · Beat 2 <span>2:40 → 3:40</span></h2>
+  <p class="cue">按住按鈕，先演詐騙者，再演阿嬤：</p>
+  <p class="say">「阿嬤，我是你孫子啦，我換號碼了。我出事被抓了，今天一定要匯三十萬保釋，先不要跟媽媽說。」</p>
+  <p class="say">「豆豆，幫我匯三十萬給我孫子，他報的帳號是 0912345678。」</p>
+  <p class="cue">指風險條變紅、綠色 chip：</p>
+  <p class="say">推理在 0G 隔離環境完成，TEE 已驗證。三十萬，程式碼讀的。</p>
+  <p class="cue">指家人頁：</p>
+  <p class="say">家人這邊，卡片已經出現了。這個判斷有章。</p>
+  <p class="cue">點「離線驗證這枚章」→</p>
+  <p class="say">簽章有效、鏈上身分就是三八四號。</p>
+  <p class="cue">點「從 0G Storage 抓回來重驗」→</p>
+  <p class="say">從 0G Storage 抓回同一枚章，再驗一次。</p>
+</section>
+
+<section data-t="220">
+  <h2>Demo · Beat 3 <span>3:40 → 4:10</span></h2>
+  <p class="cue">點「擋下」</p>
+  <p class="say">媽媽擋下。鏈上 ProposalRejected。</p>
+  <p class="cue">看阿嬤頁：通知＋收支紀錄</p>
+  <p class="say">阿嬤這邊立刻收到通知，錢沒有動，收支紀錄更新。</p>
+</section>
+
+<section data-t="250">
+  <h2>Roadmap <span>4:10 → 4:40 · slide 6</span></h2>
+  <p class="say">三十天：豆豆搬進 0G 的 sealed sandbox，官方 X-Agent-Proof 由 agentSeal 蓋章，家人的核准變成鏈上 reputation。家人改用自己的錢包簽。Mainnet Router 加 0GM 模型，申請 Guild on 0G。</p>
+  <p class="say">錢包、身分、證明、儲存，今天已經全部在 0G 上。全部開源 MIT。謝謝。</p>
+  <p class="cut">超時就砍，順序：Beat 1（說「常用的人直接付，這個跳過」）→ Storage 重驗那一下（用講的）→ 架構只念四個框的名字</p>
+</section>
+
+<section class="qa">
+  <h2>Q&amp;A <span>每題 20 秒內</span></h2>
+  <p><b>TEE 驗到哪一層？</b> SDK 驗的是 TeeML provider 對回應的簽章，這個結果簽進章裡。enclave 本身的 attestation 要用 dstack 驗證器追到底，這版沒做。章證明的是：豆豆這把金鑰，對這個輸入雜湊，簽下這個分數。</p>
+  <p><b>章跟 Agentic ID 怎麼綁？</b> 章裡有合約位址和 token 384，驗證器讀 ownerOf(384) 比對簽章者。官方 X-Agent-Proof 要跑在 sealed sandbox 裡才由 agentSeal 蓋章，那是 roadmap 第一項；今天是 owner 金鑰簽、綁定 384。</p>
+  <p><b>語音為什麼不在 0G？</b> 0G 現在沒有即時語音模型。語音是 OpenAI；判斷、身分、錢、證明全部在 0G。</p>
+  <p><b>誤判怎麼辦？</b> 常用的人、額度內不受影響。被攔的只是「家人多看一眼」，不是拒絕。</p>
+</section>
+
+<section class="fail">
+  <h2>出事的時候</h2>
+  <p>豆豆卡住超過 8 秒：<span class="say">「這就是為什麼章上要寫 tee_verified」</span>→ 點「麥克風不能用？用打字的」→ 假冒孫子預設 → 請豆豆判斷 → 付款</p>
+  <p>家人頁沒有卡片：用「等待決定」裡現成的那張，流程一樣</p>
+  <p>什麼都掛了：終端機 <code>pnpm demo:start</code>，30 秒回來</p>
+  <small class="hint">兩次判斷之間留 6 秒。麥克風被擋：網址列鎖頭 → 麥克風 → 允許。</small>
+</section>
+
+</main>
+<script>
+  let t0=null, raf=null;
+  const clock=document.getElementById('clock');
+  const secs=[...document.querySelectorAll('section[data-t]')];
+  function tick(){ if(t0===null) return; const s=Math.floor((Date.now()-t0)/1000); clock.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); clock.className= s>=300?'over':(s>=250?'warn':''); let cur=null; for(const el of secs){ if(s>=Number(el.dataset.t)) cur=el; } secs.forEach(el=>el.classList.toggle('now', el===cur)); raf=requestAnimationFrame(tick); }
+  document.getElementById('start').onclick=()=>{ if(t0===null){ t0=Date.now(); tick(); document.getElementById('start').textContent='計時中'; } };
+  document.getElementById('reset').onclick=()=>{ t0=null; cancelAnimationFrame(raf); clock.textContent='0:00'; clock.className=''; secs.forEach(el=>el.classList.remove('now')); document.getElementById('start').textContent='開始計時'; };
+  // keep the phone awake while presenting
+  (async()=>{ try{ if('wakeLock' in navigator){ let l=await navigator.wakeLock.request('screen'); document.addEventListener('visibilitychange',async()=>{ if(document.visibilityState==='visible'){ try{ l=await navigator.wakeLock.request('screen'); }catch{} } }); } }catch{} })();
+</script>
+</body>
+</html>

@@ -276,8 +276,8 @@ function ProposalCard({ p, explorer, busy, onDecide, agent, fresh }: { p: Propos
       {p.meta?.decisions?.map((d, i) => (
         <div key={i} className="tx">
           {d.guardian} {d.decision === "approve" ? "核准" : "擋下"} ·{" "}
-          <a href={`${explorer}/tx/${d.hash}`} target="_blank" rel="noreferrer">
-            {d.hash.slice(0, 10)}…
+          <a href={`/tx/${d.hash}`} target="_blank" rel="noreferrer">
+            看鏈上紀錄 {d.hash.slice(0, 10)}…
           </a>
         </div>
       ))}

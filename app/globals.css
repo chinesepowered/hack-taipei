@@ -165,3 +165,12 @@ button { font: inherit; cursor: pointer; }
 @keyframes pulse { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.6; } }
 @keyframes arrive { 0% { transform: translateY(-4px); background: #fff3d6; } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .proposal.incoming, .proposal.fresh { animation: none; } }
+
+/* ---------- 鏈上紀錄 page ---------- */
+.txlist { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.txevent { padding: 12px 14px; border-radius: 12px; background: rgba(0,0,0,0.03); border-left: 4px solid var(--amber, #c98a1a); font-size: 1.05rem; }
+.txevent b { display: block; font-family: ui-monospace, monospace; font-size: 0.9rem; color: var(--muted, #6b5540); margin-bottom: 4px; }
+.txmeta { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin-top: 16px; font-size: 0.95rem; }
+.txmeta dt { color: var(--muted, #6b5540); }
+.txmeta dd { margin: 0; }
+.txmeta .mono { font-family: ui-monospace, monospace; font-size: 0.85rem; word-break: break-all; }

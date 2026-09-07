@@ -43,7 +43,7 @@ export async function GET() {
         by: last?.guardian,
         proposal_id: p.id,
         hash: last?.hash,
-        url: last?.hash ? `${EXPLORER_URL}/tx/${last.hash}` : undefined,
+        url: last?.hash ? `/tx/${last.hash}` : undefined,
         risk: p.riskScore,
       });
     }

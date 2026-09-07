@@ -17,7 +17,11 @@ export type WalletState = {
   explorer: string;
 };
 
+/** Our own decoded receipt page; it links onward to the public explorer. */
 export function txUrl(hash: Hex) {
+  return `/tx/${hash}`;
+}
+export function explorerTxUrl(hash: Hex) {
   return `${EXPLORER_URL}/tx/${hash}`;
 }
 

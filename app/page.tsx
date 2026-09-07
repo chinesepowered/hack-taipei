@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Beagle } from "@/components/Beagle";
 import { RiskMeter, type ProofView } from "@/components/RiskMeter";
 import { TypedFallback } from "@/components/TypedFallback";
+import { Ledger } from "@/components/Ledger";
 import { RealtimeSession, type AgentState, type TranscriptLine, type TurnMode } from "@/lib/realtime/client";
 
 type Wallet = { balance_usdc: string; daily_limit_usdc: string; remaining_today_usdc: string; explorer: string; error?: string };
@@ -42,7 +43,7 @@ export default function AhmaPage() {
 
   useEffect(() => {
     loadWallet();
-    const t = setInterval(loadWallet, 8000);
+    const t = setInterval(loadWallet, 3000);
     try {
       const saved = localStorage.getItem("doudou-mode");
       if (saved === "auto" || saved === "ptt") setMode(saved);
@@ -228,6 +229,18 @@ export default function AhmaPage() {
           </section>
         </div>
       </div>
+
+      <Ledger
+        onChange={(e) => {
+          loadWallet();
+          setState(e.kind === "executed" ? "happy" : "worried");
+          setAction(
+            e.kind === "executed"
+              ? { kind: "executed", text: `家人核准了，${e.amount_usdc} 元已付出去`, url: e.url }
+              : { kind: "rejected", text: `家人擋下了這筆 ${e.amount_usdc} 元，錢沒有動`, url: e.url },
+          );
+        }}
+      />
 
       <section className="card" style={{ marginTop: 20 }}>
         <h2>對話</h2>

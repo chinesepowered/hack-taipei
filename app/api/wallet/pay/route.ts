@@ -5,6 +5,8 @@ import { resolveRecipient } from "@/lib/contacts";
 import { latestAssessment, recallAssessment } from "@/lib/proof/assessments";
 import { agentIdentity, makeStamp, memoWithProof } from "@/lib/proof/stamp";
 import { toZh } from "@/lib/errors";
+import { recordPayment } from "@/lib/ledger";
+import { endInflight, startInflight } from "@/lib/inflight";
 
 export const runtime = "nodejs";
 
@@ -30,6 +32,7 @@ export async function POST(req: Request) {
     const direct = (await canPayDirectly(recipient.address, amount)) && riskScore < 40;
     if (direct) {
       const tx = await payDirect({ to: recipient.address, amount, memo: rawMemo });
+      recordPayment({ recipient: recipient.name, amount_usdc: amountUsdc, memo: rawMemo, hash: tx.hash, url: tx.url });
       return NextResponse.json({ status: "paid", recipient: recipient.name, amount_usdc: amountUsdc, tx: tx.hash, url: tx.url });
     }
 
@@ -43,7 +46,19 @@ export async function POST(req: Request) {
       : null;
     const memo = memoWithProof(rawMemo || `${assessment?.pattern ?? "可疑付款"}`, stamp?.id ?? null);
 
-    const proposal = await proposePayment({
+    // Show the family the card now; the chain confirms in a few seconds.
+    const inflight = startInflight({
+      recipientName: recipient.name,
+      amount_usdc: amountUsdc,
+      riskScore,
+      pattern: String(assessment?.pattern || body.pattern || ""),
+      explanation: String(assessment?.explanation_zh || body.explanation_zh || ""),
+      callerClaims: String(body.caller_claims ?? ""),
+      reason: String(body.reason ?? ""),
+    });
+    let proposal;
+    try {
+      proposal = await proposePayment({
       to: recipient.address,
       amount,
       memo,
@@ -66,6 +81,9 @@ export async function POST(req: Request) {
         })(),
       },
     });
+    } finally {
+      endInflight(inflight);
+    }
     return NextResponse.json({
       status: "needs_family",
       proposal_id: proposal.id,

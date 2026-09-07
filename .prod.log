@@ -1,14 +1,6 @@
 ▲ Next.js 16.3.4
 - Local:         http://localhost:3000
 - Network:       http://192.168.68.150:3000
-✓ Ready in 559ms
-✓ Running next.config.ts took 133ms
+✓ Ready in 471ms
+✓ Running next.config.ts took 109ms
 Detected testnet (chain ID: 16602)
-[chain] reject attempt 1 failed, retrying: The contract function "reject" reverted.
-[chain] reject attempt 2 failed, retrying: The contract function "reject" reverted.
-[chain] reject attempt 3 failed, retrying: The contract function "reject" reverted.
-[chain] reject attempt 4 failed, retrying: The contract function "reject" reverted.
-[chain] reject attempt 1 failed, retrying: The contract function "reject" reverted with the following reason:
-[chain] reject attempt 2 failed, retrying: The contract function "reject" reverted with the following reason:
-[chain] reject attempt 3 failed, retrying: The contract function "reject" reverted with the following reason:
-[chain] reject attempt 4 failed, retrying: The contract function "reject" reverted with the following reason:

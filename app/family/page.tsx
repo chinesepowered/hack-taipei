@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ProofChip } from "@/components/RiskMeter";
 
@@ -28,7 +28,8 @@ type Proposal = {
   } | null;
 };
 type Agent = { name: string; address: string | null; agent_id_token: string | null; agent_id_contract: string | null; chain: string; explorer?: string | null; agent_seal?: string | null };
-type Data = { proposals: Proposal[]; guardians: { index: number; name: string }[]; explorer: string; wallet: string; agent?: Agent | null; error?: string };
+type Inflight = { key: string; recipientName: string; amount_usdc: number; riskScore: number; pattern: string; explanation: string; callerClaims: string; reason: string; at: number };
+type Data = { proposals: Proposal[]; guardians: { index: number; name: string }[]; explorer: string; wallet: string; agent?: Agent | null; inflight?: Inflight[]; error?: string };
 type Verify = { ok: boolean; reason: string; signer: string | null; id: string | null; payload: { model?: string; score?: number; tee_verified?: boolean | null } | null; identity?: { checked: boolean; ok: boolean; reason: string; explorer?: string } | null };
 
 const STATUS_ZH = { pending: "等你決定", executed: "已付款", rejected: "已擋下" } as const;
@@ -38,10 +39,21 @@ export default function FamilyPage() {
   const [me, setMe] = useState(1);
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState("");
+  const [fresh, setFresh] = useState<Set<number>>(new Set());
+  const seenIds = useRef<Set<number> | null>(null);
 
   async function load() {
     try {
-      const d = await fetch("/api/proposals").then((r) => r.json());
+      const d: Data = await fetch("/api/proposals").then((r) => r.json());
+      const ids = new Set<number>((d.proposals ?? []).map((p) => p.id));
+      if (seenIds.current) {
+        const arrived = [...ids].filter((id) => !seenIds.current!.has(id));
+        if (arrived.length) {
+          setFresh((prev) => new Set([...prev, ...arrived]));
+          setTimeout(() => setFresh((prev) => { const n = new Set(prev); arrived.forEach((id) => n.delete(id)); return n; }), 6000);
+        }
+      }
+      seenIds.current = ids;
       setData(d);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -50,7 +62,7 @@ export default function FamilyPage() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 3000);
+    const t = setInterval(load, 1500);
     return () => clearInterval(t);
   }, []);
 
@@ -134,9 +146,26 @@ export default function FamilyPage() {
 
       <section className="card" style={{ marginBottom: 20 }}>
         <h2>等待決定</h2>
-        {pending.length === 0 && <div className="empty">目前沒有需要你決定的付款。</div>}
+        {(data?.inflight ?? []).map((f) => (
+          <div key={f.key} className="proposal pending incoming">
+            <div className="row">
+              <div>
+                <span className="amt">{Number(f.amount_usdc).toLocaleString()} 元</span> <span className="to">給 {f.recipientName}</span>
+              </div>
+              <span className="badge pending">豆豆送上鏈中…</span>
+            </div>
+            <div className="why">
+              <b>豆豆的判斷 · 風險 {f.riskScore}</b>
+              {f.pattern && <> · {f.pattern}</>}
+              <div>{f.explanation}</div>
+            </div>
+            {f.callerClaims && <div className="claims">來電者說：{f.callerClaims}</div>}
+            {f.reason && <div className="claims">阿嬤說：{f.reason}</div>}
+          </div>
+        ))}
+        {pending.length === 0 && (data?.inflight ?? []).length === 0 && <div className="empty">目前沒有需要你決定的付款。</div>}
         {pending.map((p) => (
-          <ProposalCard key={p.id} p={p} explorer={data!.explorer} busy={busy === p.id} onDecide={decide} agent={data?.agent ?? null} />
+          <ProposalCard key={p.id} p={p} explorer={data!.explorer} busy={busy === p.id} onDecide={decide} agent={data?.agent ?? null} fresh={fresh.has(p.id)} />
         ))}
       </section>
 
@@ -213,10 +242,10 @@ function StampBox({ p, agent }: { p: Proposal; agent: Agent | null }) {
   );
 }
 
-function ProposalCard({ p, explorer, busy, onDecide, agent }: { p: Proposal; explorer: string; busy: boolean; onDecide: (id: number, d: "approve" | "reject") => void; agent: Agent | null }) {
+function ProposalCard({ p, explorer, busy, onDecide, agent, fresh }: { p: Proposal; explorer: string; busy: boolean; onDecide: (id: number, d: "approve" | "reject") => void; agent: Agent | null; fresh?: boolean }) {
   const who = p.meta?.recipientName || `${p.to.slice(0, 6)}…${p.to.slice(-4)}`;
   return (
-    <div className={`proposal ${p.status}`}>
+    <div className={`proposal ${p.status}${fresh ? " fresh" : ""}`}>
       <div className="row">
         <div>
           <span className="amt">{Number(p.amountUsdc).toLocaleString()} 元</span> <span className="to">給 {who}</span>

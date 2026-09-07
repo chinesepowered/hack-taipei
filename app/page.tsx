@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Beagle } from "@/components/Beagle";
 import { RiskMeter, type ProofView } from "@/components/RiskMeter";
+import { TypedFallback } from "@/components/TypedFallback";
 import { RealtimeSession, type AgentState, type TranscriptLine, type TurnMode } from "@/lib/realtime/client";
 
 type Wallet = { balance_usdc: string; daily_limit_usdc: string; remaining_today_usdc: string; explorer: string; error?: string };
@@ -202,6 +203,15 @@ export default function AhmaPage() {
           <section className="card">
             <h2>豆豆的判斷</h2>
             <RiskMeter score={risk.score} pattern={risk.pattern} explanation={risk.explanation} proof={risk.proof} />
+            <TypedFallback
+              onAssessment={(a) => setRisk({ score: a.risk_score, pattern: a.pattern, explanation: a.explanation_zh, proof: a.proof ?? null })}
+              onPayment={(p) => {
+                if (p.status === "paid") setAction({ kind: "paid", text: `已付 ${p.amount_usdc} 元給${p.recipient}`, url: p.url });
+                else if (p.status === "needs_family") setAction({ kind: "needs_family", text: `給${p.recipient}的 ${p.amount_usdc} 元已交給家人決定（提案 #${p.proposal_id}）`, url: p.url });
+                else setAction({ kind: "error", text: `出錯了：${p.error ?? p.status}` });
+                loadWallet();
+              }}
+            />
             {action && (
               <div className={`action ${action.kind === "paid" || action.kind === "executed" ? "paid" : action.kind === "rejected" ? "blocked" : ""}`} style={{ marginTop: 14 }}>
                 {action.text}

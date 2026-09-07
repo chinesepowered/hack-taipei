@@ -127,3 +127,15 @@ button { font: inherit; cursor: pointer; }
 .verify.ok { background: rgba(46,139,87,0.10); }
 .verify.bad { background: rgba(229,72,77,0.10); }
 .stamp-text { width: 100%; margin-top: 8px; font-family: ui-monospace, monospace; font-size: 0.75rem; word-break: break-all; }
+
+/* ---------- typed fallback ---------- */
+.typed { margin-top: 12px; }
+.typed button.ghost { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line, #d9cdbb); background: transparent; cursor: pointer; font-size: 0.95rem; }
+.typed-form { display: grid; gap: 8px; margin-top: 10px; }
+.typed-presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.typed-form label { display: grid; gap: 4px; font-size: 0.95rem; color: var(--muted, #6b5540); }
+.typed-form input, .typed-form textarea { font: inherit; font-size: 1rem; padding: 8px 10px; border: 1px solid var(--line, #d9cdbb); border-radius: 8px; background: #fff; color: inherit; }
+.typed-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.typed-actions button { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line, #d9cdbb); background: #fff; cursor: pointer; font-size: 1rem; }
+.typed-actions button.ok { background: var(--green, #2e8b57); color: #fff; border-color: transparent; }
+.typed-actions button:disabled { opacity: 0.6; cursor: wait; }

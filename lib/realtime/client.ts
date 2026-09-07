@@ -67,6 +67,9 @@ export class RealtimeSession {
     this.mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
     });
+    const track = this.mic.getAudioTracks()[0];
+    if (!track || track.readyState !== "live" || track.muted) this.cb.onError?.("麥克風沒有聲音進來。請看網址列左邊的鎖頭，把麥克風設成「允許」，或改用 localhost:3000。");
+    track?.addEventListener("mute", () => this.cb.onError?.("麥克風被靜音了（系統或另一個程式佔用）。"));
     for (const track of this.mic.getTracks()) {
       if (this.mode === "ptt") track.enabled = false;
       this.pc.addTrack(track, this.mic);
@@ -198,7 +201,8 @@ export class RealtimeSession {
         break;
       case "conversation.item.input_audio_transcription.completed": {
         const t = String(ev.transcript ?? "").trim();
-        if (t) {
+        // Silence sometimes transcribes as the model's own hint text or a lone punctuation mark; drop those.
+        if (t && !/台灣繁體中文對話|金額用中文數字/.test(t) && /[\p{L}\p{N}]/u.test(t)) {
           const now = Date.now();
           const keep = this.recentAhmaAt.map((at, i) => [at, this.recentAhma[i]] as const).filter(([at]) => now - at < 45_000).slice(-1);
           this.recentAhma = [...keep.map(([, x]) => x), t];

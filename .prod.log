@@ -1,6 +1,6 @@
 ▲ Next.js 16.3.4
 - Local:         http://localhost:3000
 - Network:       http://192.168.68.150:3000
-✓ Ready in 684ms
-✓ Running next.config.ts took 166ms
+✓ Ready in 1537ms
+✓ Running next.config.ts took 499ms
 Detected testnet (chain ID: 16602)
